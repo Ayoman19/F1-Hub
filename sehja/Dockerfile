@@ -1,13 +1,15 @@
-# Build stage: compile the app with Maven + JDK 25
+# Build stage: JDK 25 + Maven installed via apt
 FROM eclipse-temurin:25-jdk AS build
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends maven \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-COPY .mvn/ .mvn/
-COPY mvnw pom.xml ./
-RUN chmod +x mvnw && ./mvnw -q dependency:go-offline
+COPY pom.xml ./
+RUN mvn -q dependency:go-offline
 COPY src/ src/
-RUN ./mvnw -q clean package -DskipTests
+RUN mvn -q clean package -DskipTests
 
-# Runtime stage: lean image with just the JRE + jar
+# Runtime stage: lean JRE image with just the jar
 FROM eclipse-temurin:25-jre
 WORKDIR /app
 COPY --from=build /app/target/sehja-0.0.1-SNAPSHOT.jar app.jar
