@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Videos - F1 Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css?v=11">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="brand">
+                <span class="logo" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 5 L10 12 L3 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 5 L17 12 L10 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+                        <path d="M17 5 L24 12 L17 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+                    </svg>
+                </span>
+                <span>F1 HUB</span>
+            </a>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/standings">Standings</a></li>
+                <li><a href="/calendar">Calendar</a></li>
+                <li><a href="/news">News</a></li>
+                <li><a href="/videos" class="active">Videos</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="page-heading">
+            <h2>Videos</h2>
+            <p class="subtitle">The latest from Formula 1's video catalog</p>
+        </header>
+
+        <div class="video-grid">
+            <a th:each="v : ${videos}" th:href="${v.sourceUrl}" target="_blank" rel="noopener noreferrer" class="video-card">
+                <div class="video-thumb">
+                    <img th:src="${v.thumbnailUrl}" th:alt="${v.title}" loading="lazy">
+                    <span class="video-play" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </span>
+                </div>
+                <div class="video-meta">
+                    <span class="video-category" th:if="${v.category != null}" th:text="${v.category}">Category</span>
+                    <h3 th:text="${v.title}">Title</h3>
+                </div>
+            </a>
+        </div>
+
+        <p class="empty-state" th:if="${#lists.isEmpty(videos)}">No videos yet.</p>
+    </div>
+</body>
+</html>

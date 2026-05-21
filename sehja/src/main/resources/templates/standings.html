@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Standings - F1 Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css?v=11">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="brand">
+                <span class="logo" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 5 L10 12 L3 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 5 L17 12 L10 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+                        <path d="M17 5 L24 12 L17 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+                    </svg>
+                </span>
+                <span>F1 HUB</span>
+            </a>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/standings" class="active">Standings</a></li>
+                <li><a href="/calendar">Calendar</a></li>
+                <li><a href="/news">News</a></li>
+                <li><a href="/videos">Videos</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="page-heading">
+            <h2>Driver Standings</h2>
+            <p class="subtitle">2026 Formula 1 World Championship</p>
+        </header>
+
+        <table id="standingsTable">
+            <thead>
+                <tr>
+                    <th>Pos</th>
+                    <th>Driver</th>
+                    <th>Team</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody id="driversList"></tbody>
+        </table>
+    </div>
+
+    <script>
+        fetch('/api/drivers')
+            .then(res => res.json())
+            .then(data => {
+                const list = document.getElementById('driversList');
+                if (!data.length) {
+                    list.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:2rem;">No drivers yet.</td></tr>`;
+                    return;
+                }
+                list.innerHTML = data.map(driver => `
+                    <tr class="driver-row" data-href="/driver/${driver.id}" tabindex="0">
+                        <td>${driver.position}</td>
+                        <td class="driver-name-cell">
+                            ${driver.photoUrl ? `<img class="driver-avatar" src="${driver.photoUrl}" alt="${driver.name}" loading="lazy">` : '<span class="driver-avatar-placeholder"></span>'}
+                            <span>${driver.name}</span>
+                        </td>
+                        <td>${driver.team}</td>
+                        <td>${driver.points}</td>
+                    </tr>
+                `).join('');
+                list.querySelectorAll('.driver-row').forEach(row => {
+                    row.addEventListener('click', () => {
+                        window.location.href = row.dataset.href;
+                    });
+                    row.addEventListener('keydown', e => {
+                        if (e.key === 'Enter') window.location.href = row.dataset.href;
+                    });
+                });
+            });
+    </script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css?v=11">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="brand">
+                <span class="logo" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 5 L10 12 L3 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 5 L17 12 L10 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+                        <path d="M17 5 L24 12 L17 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+                    </svg>
+                </span>
+                <span>F1 HUB</span>
+            </a>
+            <ul>
+                <li><a href="/" class="active">Home</a></li>
+                <li><a href="/standings">Standings</a></li>
+                <li><a href="/calendar">Calendar</a></li>
+                <li><a href="/news">News</a></li>
+                <li><a href="/videos">Videos</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section class="hero">
+            <div class="hero-content">
+                <span class="eyebrow">2026 Season</span>
+                <h2>The Pulse of <span class="accent">Formula 1</span>, in One Place.</h2>
+                <p>Live driver standings, the full race calendar, and the latest news from the paddock — all updated as the season unfolds.</p>
+                <div class="hero-actions">
+                    <a href="/standings" class="btn btn-primary">View Standings →</a>
+                    <a href="/calendar" class="btn btn-ghost">Race Calendar</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-strip">
+            <div class="stat-tile">
+                <span class="stat-value" id="statDrivers">–</span>
+                <span class="stat-label">Drivers</span>
+            </div>
+            <div class="stat-tile">
+                <span class="stat-value" id="statRaces">–</span>
+                <span class="stat-label">Races scheduled</span>
+            </div>
+            <div class="stat-tile">
+                <span class="stat-value" id="statNews">–</span>
+                <span class="stat-label">News articles</span>
+            </div>
+            <div class="stat-tile">
+                <span class="stat-value" id="statLeader">–</span>
+                <span class="stat-label">Championship leader</span>
+            </div>
+        </section>
+
+        <section class="links">
+            <a href="/standings" class="card">
+                <span class="card-arrow">→</span>
+                <span class="card-icon">📊</span>
+                <span>Driver Standings</span>
+            </a>
+            <a href="/calendar" class="card">
+                <span class="card-arrow">→</span>
+                <span class="card-icon">📅</span>
+                <span>Race Calendar</span>
+            </a>
+            <a href="/news" class="card">
+                <span class="card-arrow">→</span>
+                <span class="card-icon">📰</span>
+                <span>Latest News</span>
+            </a>
+        </section>
+
+        <section class="featured">
+            <div class="featured-col">
+                <div class="section-header">
+                    <h2>🏁 Upcoming Races</h2>
+                    <a href="/calendar" class="more-link">All →</a>
+                </div>
+                <div id="upcomingRaces" class="featured-content">
+                    <p class="empty-state">Loading upcoming races…</p>
+                </div>
+            </div>
+
+            <div class="featured-col">
+                <div class="section-header">
+                    <h2>📰 Latest News</h2>
+                    <a href="/news" class="more-link">All →</a>
+                </div>
+                <div id="latestNews" class="featured-content">
+                    <p class="empty-state">Loading latest news…</p>
+                </div>
+            </div>
+
+            <div class="featured-col">
+                <div class="section-header">
+                    <h2>🏆 Top Standings</h2>
+                    <a href="/standings" class="more-link">All →</a>
+                </div>
+                <div id="topDrivers" class="featured-content">
+                    <p class="empty-state">Loading standings…</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const todayIso = new Date().toISOString().slice(0, 10);
+
+        fetch('/api/races')
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('upcomingRaces');
+                document.getElementById('statRaces').textContent = data.length;
+                const upcoming = data.filter(r => r.date >= todayIso).slice(0, 3);
+                const list = upcoming.length ? upcoming : data.slice(0, 3);
+                if (!list.length) {
+                    container.innerHTML = '<p class="empty-state">No races scheduled yet.</p>';
+                    return;
+                }
+                container.innerHTML = list.map(race => `
+                    <a class="race-card" href="/race/${race.id}">
+                        <h3>${race.name}</h3>
+                        <p><strong>${race.circuit}</strong> · ${race.country}</p>
+                        <p>${new Date(race.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                    </a>
+                `).join('');
+            })
+            .catch(() => {
+                document.getElementById('upcomingRaces').innerHTML =
+                    '<p class="empty-state">Unable to load races.</p>';
+            });
+
+        fetch('/api/news')
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('latestNews');
+                document.getElementById('statNews').textContent = data.length;
+                const list = data.slice(0, 3);
+                if (!list.length) {
+                    container.innerHTML = '<p class="empty-state">No news yet.</p>';
+                    return;
+                }
+                container.innerHTML = list.map(article => `
+                    <a class="news-card" href="/news/${article.id}">
+                        <h3>${article.title}</h3>
+                        <p>${article.content}</p>
+                        <small>${new Date(article.publishedDate).toLocaleDateString()}</small>
+                    </a>
+                `).join('');
+            })
+            .catch(() => {
+                document.getElementById('latestNews').innerHTML =
+                    '<p class="empty-state">Unable to load news.</p>';
+            });
+
+        fetch('/api/drivers')
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('topDrivers');
+                document.getElementById('statDrivers').textContent = data.length;
+                const leader = data[0];
+                document.getElementById('statLeader').textContent =
+                    leader ? leader.name : '—';
+                const list = data.slice(0, 5);
+                if (!list.length) {
+                    container.innerHTML = '<p class="empty-state">No drivers yet.</p>';
+                    return;
+                }
+                container.innerHTML = `
+                    <ol class="mini-standings">
+                        ${list.map(d => `
+                            <li>
+                                <span class="pos">${d.position}</span>
+                                <span class="who">
+                                    <strong>${d.name}</strong>
+                                    <small>${d.team}</small>
+                                </span>
+                                <span class="pts">${d.points} PTS</span>
+                            </li>
+                        `).join('')}
+                    </ol>
+                `;
+            })
+            .catch(() => {
+                document.getElementById('topDrivers').innerHTML =
+                    '<p class="empty-state">Unable to load standings.</p>';
+            });
+    </script>
+</body>
+</html>

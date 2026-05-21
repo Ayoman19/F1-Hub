@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${article != null ? article.title + ' - F1 Hub' : 'Article not found - F1 Hub'}">Article - F1 Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css?v=11">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="brand">
+                <span class="logo" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 5 L10 12 L3 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 5 L17 12 L10 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+                        <path d="M17 5 L24 12 L17 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+                    </svg>
+                </span>
+                <span>F1 HUB</span>
+            </a>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/standings">Standings</a></li>
+                <li><a href="/calendar">Calendar</a></li>
+                <li><a href="/news" class="active">News</a></li>
+                <li><a href="/videos">Videos</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container article-container">
+        <a href="/news" class="back-link">← Back to news</a>
+
+        <article th:if="${article != null}">
+            <div class="article-hero-image" th:if="${article.imageUrl != null}">
+                <img th:src="${article.imageUrl}" th:alt="${article.title}" loading="lazy">
+            </div>
+
+            <header class="article-header">
+                <span class="article-eyebrow">F1 News</span>
+                <h1 th:text="${article.title}">Article title</h1>
+                <p class="article-meta">
+                    <span th:text="${dateStr}">Date</span>
+                    ·
+                    <span th:text="${timeStr}">Time</span>
+                </p>
+            </header>
+
+            <div class="article-body">
+                <p class="article-summary" th:text="${article.content}">Summary</p>
+
+                <div class="article-cta" th:if="${article.url != null}">
+                    <p class="article-cta-note">Read the full reporting from Formula 1's editorial team:</p>
+                    <a th:href="${article.url}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                        Read full article on F1.com →
+                    </a>
+                </div>
+            </div>
+        </article>
+
+        <p class="empty-state" th:if="${article == null}">Article not found.</p>
+    </div>
+</body>
+</html>

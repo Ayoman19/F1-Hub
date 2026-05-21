@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${driver != null ? driver.name + ' - F1 Hub' : 'Driver not found - F1 Hub'}">Driver - F1 Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css?v=11">
+    <style th:if="${driver != null}" th:inline="text">
+        :root {
+            --team: [[${driver.teamColor}]];
+            --team-accent: [[${driver.teamColorAccent}]];
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="brand">
+                <span class="logo" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 5 L10 12 L3 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 5 L17 12 L10 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+                        <path d="M17 5 L24 12 L17 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+                    </svg>
+                </span>
+                <span>F1 HUB</span>
+            </a>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/standings" class="active">Standings</a></li>
+                <li><a href="/calendar">Calendar</a></li>
+                <li><a href="/news">News</a></li>
+                <li><a href="/videos">Videos</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <a href="/standings" class="back-link">← Back to standings</a>
+
+        <section th:if="${driver != null}" class="driver-hero team-themed">
+            <div class="driver-hero-bg"></div>
+            <div class="driver-hero-content">
+                <div class="driver-hero-left">
+                    <span class="driver-position-chip">P<span th:text="${driver.position}">1</span></span>
+                    <span class="driver-team-chip" th:text="${driver.team}">Team</span>
+                    <h1 class="driver-name">
+                        <span class="driver-first" th:text="${firstName}">First</span>
+                        <span class="driver-last" th:text="${lastName}">Last</span>
+                    </h1>
+                    <p class="driver-nationality">
+                        <span th:text="${driver.nationality}">Nationality</span>
+                        <span th:if="${driver.countryCode != null}" class="country-code" th:text="${driver.countryCode}">XX</span>
+                    </p>
+                </div>
+                <div class="driver-hero-right">
+                    <div class="driver-portrait" th:if="${driver.photoUrl != null}">
+                        <img th:src="${driver.photoUrl}" th:alt="${driver.name}" loading="lazy">
+                        <span class="driver-portrait-number" th:if="${driver.raceNumber != null}" th:text="${driver.raceNumber}">00</span>
+                    </div>
+                    <div class="driver-number" th:if="${driver.photoUrl == null and driver.raceNumber != null}" th:text="${driver.raceNumber}">00</div>
+                </div>
+            </div>
+        </section>
+
+        <section th:if="${driver != null}" class="driver-stats">
+            <div class="driver-stat">
+                <span class="driver-stat-label">2026 Points</span>
+                <span class="driver-stat-value" th:text="${driver.points}">0</span>
+            </div>
+            <div class="driver-stat">
+                <span class="driver-stat-label">Championships</span>
+                <span class="driver-stat-value" th:text="${driver.championships != null ? driver.championships : '—'}">0</span>
+            </div>
+            <div class="driver-stat">
+                <span class="driver-stat-label">Career Wins</span>
+                <span class="driver-stat-value" th:text="${driver.careerWins != null ? driver.careerWins : '—'}">0</span>
+            </div>
+            <div class="driver-stat">
+                <span class="driver-stat-label">Career Podiums</span>
+                <span class="driver-stat-value" th:text="${driver.careerPodiums != null ? driver.careerPodiums : '—'}">0</span>
+            </div>
+            <div class="driver-stat">
+                <span class="driver-stat-label">Grands Prix</span>
+                <span class="driver-stat-value" th:text="${driver.gpEntered != null ? driver.gpEntered : '—'}">0</span>
+            </div>
+            <div class="driver-stat">
+                <span class="driver-stat-label">Age</span>
+                <span class="driver-stat-value" th:text="${age != null ? age : '—'}">0</span>
+            </div>
+        </section>
+
+        <section th:if="${driver != null}" class="driver-grid">
+            <div class="driver-card">
+                <h3>Personal</h3>
+                <dl class="driver-meta">
+                    <dt>Nationality</dt>
+                    <dd th:text="${driver.nationality}">—</dd>
+                    <dt>Born</dt>
+                    <dd>
+                        <span th:if="${dobStr != null}" th:text="${dobStr}">—</span>
+                        <span th:if="${dobStr == null}">—</span>
+                    </dd>
+                    <dt>Birthplace</dt>
+                    <dd th:text="${driver.placeOfBirth != null ? driver.placeOfBirth : '—'}">—</dd>
+                    <dt>Race number</dt>
+                    <dd th:text="${driver.raceNumber != null ? driver.raceNumber : '—'}">—</dd>
+                </dl>
+            </div>
+
+            <div class="driver-card">
+                <h3>Current team</h3>
+                <p class="driver-current-team" th:text="${driver.team}">Team</p>
+                <p class="driver-team-pos">Currently P<span th:text="${driver.position}">0</span> with <span th:text="${driver.points}">0</span> pts in 2026.</p>
+            </div>
+
+            <div class="driver-card driver-card-wide" th:if="${driver.previousTeams != null}">
+                <h3>Career path</h3>
+                <p th:text="${driver.previousTeams}">Previous teams</p>
+            </div>
+
+            <div class="driver-card driver-card-wide" th:if="${driver.bio != null}">
+                <h3>About</h3>
+                <p th:text="${driver.bio}">Bio</p>
+            </div>
+        </section>
+
+        <p class="empty-state" th:if="${driver == null}">Driver not found.</p>
+    </div>
+</body>
+</html>
