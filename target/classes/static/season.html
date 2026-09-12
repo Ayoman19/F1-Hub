@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Season · F1 Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0b12;
+            --bg-elev: #14141c;
+            --bg-elev-2: #1c1c26;
+            --panel: rgba(20, 20, 28, 0.85);
+            --text: #f5f5f7;
+            --text-dim: #a0a0ad;
+            --text-muted: #6e6e7a;
+            --border: rgba(120, 130, 160, 0.22);
+            --border-strong: rgba(160, 170, 200, 0.45);
+            --red: #e10600;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        *::-webkit-scrollbar { display: none; width: 0; height: 0; }
+        html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Titillium Web', 'Segoe UI', sans-serif; }
+
+        .navbar {
+            background: rgba(11, 11, 18, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.85rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 50;
+        }
+        .navbar a.brand {
+            font-weight: 900; font-size: 1.05rem;
+            letter-spacing: 0.08em; text-decoration: none; color: var(--text);
+        }
+        .navbar .brand::before {
+            content: '⬅'; display: inline-block; margin-right: 0.5rem;
+            color: var(--red);
+        }
+        .navbar h1 {
+            font-size: 0.85rem; font-weight: 700;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--text-dim);
+        }
+        .navbar h1 .accent { color: var(--red); }
+        .navbar .actions { display: flex; gap: 0.5rem; }
+        .navbar .action {
+            background: transparent; border: 1px solid var(--border);
+            color: var(--text-dim); font-family: inherit;
+            font-size: 0.72rem; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            padding: 0.4rem 0.75rem; border-radius: 6px;
+            cursor: pointer;
+        }
+        .navbar .action:hover { border-color: var(--red); color: var(--red); }
+
+        .container {
+            max-width: 1400px; margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        .eyebrow {
+            color: var(--red); font-size: 0.75rem; font-weight: 800;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        h1.title { font-size: 2.4rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 0.35rem; }
+        h1.title .accent { color: var(--red); }
+        p.subtitle { color: var(--text-dim); font-size: 1rem; max-width: 640px; margin-bottom: 2rem; }
+
+        /* ===================== LANDING ===================== */
+        .mode-grid {
+            display: grid; gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        }
+        .mode-card {
+            background: var(--bg-elev);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 2rem 1.75rem;
+            position: relative; overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+            text-align: left;
+            color: var(--text);
+            font-family: inherit;
+        }
+        .mode-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--red);
+        }
+        .mode-card::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, var(--red) 0%, transparent 60%);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .mode-card:hover::before { opacity: 0.05; }
+        .mode-icon {
+            font-size: 2.4rem;
+            display: block; margin-bottom: 1rem;
+        }
+        .mode-card h2 { font-size: 1.4rem; font-weight: 900; margin-bottom: 0.5rem; }
+        .mode-card p { color: var(--text-dim); font-size: 0.9rem; line-height: 1.5; }
+        .mode-card .cta {
+            display: inline-block; margin-top: 1.25rem;
+            color: var(--red); font-weight: 800; font-size: 0.85rem;
+            letter-spacing: 0.08em; text-transform: uppercase;
+        }
+
+        .continue-banner {
+            margin-bottom: 2rem;
+            padding: 1.25rem 1.5rem;
+            background: linear-gradient(135deg, rgba(225, 6, 0, 0.15), rgba(225, 6, 0, 0.02));
+            border: 1px solid rgba(225, 6, 0, 0.4);
+            border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 1rem; flex-wrap: wrap;
+        }
+        .continue-banner h3 { font-size: 1.05rem; font-weight: 900; margin-bottom: 0.15rem; }
+        .continue-banner p { color: var(--text-dim); font-size: 0.85rem; }
+        .continue-banner .btns { display: flex; gap: 0.5rem; }
+        .btn {
+            background: var(--red); color: white; border: 0;
+            font-family: inherit; font-weight: 800; font-size: 0.85rem;
+            letter-spacing: 0.06em; text-transform: uppercase;
+            padding: 0.75rem 1.25rem; border-radius: 8px;
+            cursor: pointer; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px -4px rgba(225, 6, 0, 0.55); }
+        .btn.ghost { background: transparent; border: 1px solid var(--border-strong); color: var(--text); }
+        .btn.ghost:hover { border-color: var(--red); color: var(--red); box-shadow: none; }
+        .btn.small { padding: 0.5rem 0.9rem; font-size: 0.75rem; }
+
+        /* ===================== ASSIGN SCREEN ===================== */
+        .assign-layout {
+            display: grid; gap: 1.5rem;
+            grid-template-columns: 1fr 1fr;
+        }
+        @media (max-width: 900px) { .assign-layout { grid-template-columns: 1fr; } }
+        .panel {
+            background: var(--bg-elev);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+        .panel-header {
+            display: flex; justify-content: space-between; align-items: baseline;
+            margin-bottom: 1rem;
+        }
+        .panel-header h3 {
+            font-size: 0.75rem; font-weight: 800;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .panel-header .hint { color: var(--text-muted); font-size: 0.72rem; letter-spacing: 0.06em; }
+        .driver-list { display: flex; flex-direction: column; gap: 0.4rem; max-height: 640px; overflow-y: auto; }
+        .driver-pill {
+            display: flex; align-items: center; gap: 0.7rem;
+            padding: 0.55rem 0.8rem;
+            background: var(--bg-elev-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: grab; user-select: none;
+            transition: border-color 0.15s;
+        }
+        .driver-pill:hover { border-color: var(--border-strong); }
+        .driver-pill.dragging { opacity: 0.5; }
+        .driver-pill.selected { border-color: var(--red); box-shadow: 0 0 0 1px var(--red); }
+        .driver-num {
+            background: var(--red); color: white;
+            width: 26px; height: 26px; border-radius: 50%;
+            display: grid; place-items: center;
+            font-weight: 900; font-size: 0.72rem;
+            flex-shrink: 0;
+        }
+        .driver-pill .info { flex: 1; min-width: 0; }
+        .driver-pill .name { font-weight: 800; font-size: 0.88rem; }
+        .driver-pill .team { color: var(--text-muted); font-size: 0.72rem; letter-spacing: 0.04em; }
+        .driver-pill .stats {
+            display: flex; gap: 0.4rem; align-items: center;
+            font-size: 0.7rem; color: var(--text-dim);
+        }
+        .stat-chip {
+            background: var(--bg-elev);
+            padding: 0.15rem 0.4rem; border-radius: 4px;
+            font-weight: 700; font-variant-numeric: tabular-nums;
+        }
+
+        .team-slot {
+            background: var(--bg-elev-2);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--team, var(--red));
+            border-radius: 8px;
+            padding: 0.75rem 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .team-slot-header {
+            display: flex; justify-content: space-between; align-items: baseline;
+            margin-bottom: 0.4rem;
+        }
+        .team-slot h4 {
+            font-size: 0.85rem; font-weight: 900;
+            letter-spacing: 0.02em;
+        }
+        .team-slot .rating {
+            font-size: 0.7rem; color: var(--text-dim);
+        }
+        .team-slot .seats {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem;
+        }
+        .seat {
+            background: var(--bg-elev);
+            border: 1px dashed var(--border-strong);
+            border-radius: 6px;
+            padding: 0.45rem;
+            min-height: 46px;
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+        .seat:hover { border-color: var(--red); }
+        .seat.empty { color: var(--text-muted); font-style: italic; justify-content: center; }
+        .seat .clear {
+            margin-left: auto;
+            background: transparent; border: 0; color: var(--text-muted);
+            font-size: 0.9rem; cursor: pointer; padding: 0 0.3rem;
+        }
+        .seat .clear:hover { color: var(--red); }
+        .seat .name { font-weight: 700; }
+
+        .assign-actions {
+            grid-column: 1 / -1;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 1rem; padding-top: 0.5rem;
+        }
+        .assign-actions .status {
+            color: var(--text-dim); font-size: 0.85rem;
+        }
+        .assign-actions .status .count { color: var(--text); font-weight: 800; }
+        .assign-actions .buttons { display: flex; gap: 0.6rem; }
+
+        /* ===================== SEASON DASHBOARD ===================== */
+        .season-topbar {
+            display: flex; justify-content: space-between; align-items: baseline;
+            margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap;
+        }
+        .season-topbar .meta {
+            color: var(--text-dim); font-size: 0.85rem;
+        }
+        .season-topbar .meta .num { color: var(--text); font-weight: 900; }
+        .dash-grid {
+            display: grid; gap: 1.5rem;
+            grid-template-columns: 1fr 1.2fr;
+        }
+        @media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr; } }
+
+        .race-list {
+            display: flex; flex-direction: column; gap: 0.4rem;
+            max-height: 680px; overflow-y: auto;
+        }
+        .race-row {
+            display: grid;
+            grid-template-columns: 32px 1fr auto;
+            gap: 0.7rem; align-items: center;
+            padding: 0.65rem 0.8rem;
+            background: var(--bg-elev-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.82rem;
+        }
+        .race-row.done { opacity: 0.65; }
+        .race-row.next {
+            border-color: var(--red);
+            box-shadow: 0 0 0 1px var(--red);
+        }
+        .race-row .rnum {
+            background: var(--bg-elev);
+            width: 26px; height: 26px; border-radius: 50%;
+            display: grid; place-items: center;
+            font-weight: 800; font-size: 0.72rem;
+        }
+        .race-row.done .rnum { background: rgba(225, 6, 0, 0.25); color: var(--red); }
+        .race-row .rname { font-weight: 800; }
+        .race-row .rmeta { color: var(--text-muted); font-size: 0.72rem; }
+        .race-row .rwinner {
+            font-size: 0.75rem; color: var(--gold);
+            font-weight: 800;
+        }
+        .race-row .rlink {
+            background: transparent; border: 0; color: var(--red);
+            font-family: inherit; font-size: 0.72rem; font-weight: 800;
+            letter-spacing: 0.06em; text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .standings-tabs {
+            display: flex; gap: 0.4rem; margin-bottom: 0.75rem;
+        }
+        .tab {
+            background: transparent; border: 1px solid var(--border);
+            color: var(--text-dim); font-family: inherit;
+            font-size: 0.72rem; font-weight: 800;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            padding: 0.4rem 0.85rem; border-radius: 999px;
+            cursor: pointer;
+        }
+        .tab.active { background: var(--red); border-color: var(--red); color: white; }
+
+        .standings-table {
+            width: 100%; border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .standings-table th {
+            text-align: left; padding: 0.5rem 0.7rem;
+            font-size: 0.68rem; font-weight: 800;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+        .standings-table td {
+            padding: 0.55rem 0.7rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        .standings-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
+        .standings-table .pos { font-weight: 900; color: var(--text-dim); width: 32px; }
+        .standings-table .pos.p1 { color: var(--gold); }
+        .standings-table .pos.p2 { color: var(--silver); }
+        .standings-table .pos.p3 { color: var(--bronze); }
+        .standings-table .name { font-weight: 800; }
+        .standings-table .team-color {
+            display: inline-block; width: 3px; height: 14px;
+            background: var(--team, var(--red));
+            margin-right: 0.5rem; vertical-align: -2px; border-radius: 1px;
+        }
+        .standings-table .team-name { color: var(--text-dim); font-size: 0.78rem; }
+        .standings-table .pts { text-align: right; font-weight: 900; font-variant-numeric: tabular-nums; }
+        .standings-table .wins { text-align: right; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+
+        /* ===================== RACE MODAL ===================== */
+        .modal-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(6px);
+            display: none;
+            z-index: 100;
+            align-items: center; justify-content: center;
+            padding: 2rem 1rem;
+        }
+        .modal-backdrop.visible { display: flex; }
+        .modal {
+            background: var(--bg-elev);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.75rem 1.5rem;
+            width: 100%; max-width: 620px;
+            max-height: 90vh; overflow-y: auto;
+        }
+        .modal .banner {
+            padding: 0.85rem 1rem;
+            background: linear-gradient(135deg, var(--red), rgba(225, 6, 0, 0.2));
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .modal .banner .eyebrow { color: white; margin-bottom: 0.2rem; opacity: 0.85; }
+        .modal .banner h2 { font-size: 1.35rem; font-weight: 900; }
+        .modal .banner .circuit {
+            color: rgba(255,255,255,0.85); font-size: 0.8rem;
+            margin-top: 0.15rem;
+        }
+        .modal .conditions {
+            display: flex; gap: 0.6rem; margin-bottom: 1rem;
+            font-size: 0.78rem; color: var(--text-dim);
+        }
+        .modal .cond {
+            background: var(--bg-elev-2); border: 1px solid var(--border);
+            padding: 0.3rem 0.6rem; border-radius: 5px;
+        }
+        .modal .cond.wet { color: #64b5f6; border-color: rgba(100, 181, 246, 0.4); }
+
+        .report-section {
+            margin-bottom: 1.25rem;
+        }
+        .report-section h3 {
+            font-size: 0.7rem; font-weight: 800;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .report-section h3::before {
+            content: ''; flex: 1; height: 1px;
+            background: var(--border);
+            margin-left: 0.4rem;
+        }
+        .report-events {
+            display: flex; flex-direction: column; gap: 0.5rem;
+        }
+        .report-event {
+            display: flex; gap: 0.7rem; align-items: flex-start;
+            padding: 0.6rem 0.75rem;
+            background: var(--bg-elev-2);
+            border-left: 3px solid var(--red);
+            border-radius: 6px;
+        }
+        .report-event .event-icon {
+            font-size: 1.15rem; flex-shrink: 0; line-height: 1;
+        }
+        .report-event .event-body { flex: 1; min-width: 0; }
+        .report-event .event-title {
+            font-size: 0.85rem; font-weight: 800;
+            margin-bottom: 0.15rem;
+        }
+        .report-event .event-text {
+            font-size: 0.78rem; color: var(--text-dim);
+            line-height: 1.4;
+        }
+        .results-toggle {
+            width: 100%;
+            background: var(--bg-elev-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.75rem; font-weight: 800;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            padding: 0.6rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 0.75rem;
+        }
+        .results-toggle:hover { border-color: var(--red); color: var(--red); }
+        .results-body { display: none; }
+        .results-body.expanded { display: block; }
+        .result-row {
+            display: grid;
+            grid-template-columns: 32px 1fr auto auto;
+            gap: 0.6rem; align-items: center;
+            padding: 0.5rem 0.7rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+        .result-row .pos {
+            width: 24px; height: 24px; border-radius: 50%;
+            display: grid; place-items: center;
+            background: var(--bg-elev-2);
+            font-weight: 900; font-size: 0.7rem;
+        }
+        .result-row.p1 .pos { background: var(--gold); color: #221a00; }
+        .result-row.p2 .pos { background: var(--silver); color: #1a1a1a; }
+        .result-row.p3 .pos { background: var(--bronze); color: #2a1600; }
+        .result-row.dnf { opacity: 0.5; }
+        .result-row .who .name { font-weight: 700; }
+        .result-row .who .team-name { color: var(--text-muted); font-size: 0.72rem; letter-spacing: 0.03em; }
+        .result-row .gap {
+            font-family: 'Courier New', monospace;
+            font-size: 0.78rem; color: var(--text-dim);
+        }
+        .result-row .pts {
+            font-weight: 900; color: var(--gold);
+            font-variant-numeric: tabular-nums; min-width: 30px; text-align: right;
+        }
+        .result-row .pts.zero { color: var(--text-muted); }
+        .modal-actions {
+            display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.25rem;
+        }
+
+        /* ===================== TOAST ===================== */
+        .toast {
+            position: fixed;
+            bottom: 1.5rem; left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-elev-2);
+            border: 1px solid var(--border-strong);
+            padding: 0.75rem 1.25rem;
+            border-radius: 999px;
+            font-size: 0.82rem; font-weight: 700;
+            z-index: 200;
+            opacity: 0;
+            transition: transform 0.25s, opacity 0.25s;
+        }
+        .toast.visible { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        .empty-state {
+            padding: 2rem 1rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="brand">F1 HUB</a>
+        <h1>My <span class="accent">Season</span></h1>
+        <div class="actions">
+            <button class="action" id="navReset" style="display: none;">Reset</button>
+            <button class="action" id="navHome">Home</button>
+        </div>
+    </nav>
+
+    <div class="container" id="app"></div>
+
+    <!-- Race modal -->
+    <div class="modal-backdrop" id="modalBackdrop">
+        <div class="modal" id="modalContent"></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+    (async function () {
+        // =========================================================
+        //   State + persistence
+        // =========================================================
+        const STORAGE_KEY = 'f1hub_season_v1';
+        function loadState() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null; }
+            catch { return null; }
+        }
+        function saveState(s) {
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+            catch (e) { console.warn('save failed', e); }
+        }
+        function wipeState() { localStorage.removeItem(STORAGE_KEY); }
+
+        // =========================================================
+        //   Fetch drivers + teams + races
+        // =========================================================
+        let drivers, teams, races;
+        try {
+            [drivers, teams, races] = await Promise.all([
+                fetch('/api/drivers').then(r => r.json()),
+                fetch('/api/teams').then(r => r.json()),
+                fetch('/api/races').then(r => r.json())
+            ]);
+        } catch (err) {
+            document.getElementById('app').innerHTML =
+                `<div class="empty-state">Failed to load data. <a href="/" style="color:var(--red)">Go home</a></div>`;
+            return;
+        }
+        drivers = (drivers || []).sort((a, b) => (a.position || 999) - (b.position || 999));
+        teams = (teams || []).sort((a, b) => (a.position || 999) - (b.position || 999));
+        races = (races || []).sort((a, b) => (a.round || 999) - (b.round || 999));
+
+        // =========================================================
+        //   Generate stats for each driver + team
+        //   Based on their real-world position (better position → better stats)
+        // =========================================================
+        function seed(str) {
+            let h = 0;
+            for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+            let s = Math.abs(h);
+            return function () {
+                s = (s * 9301 + 49297) % 233280;
+                return s / 233280;
+            };
+        }
+
+        for (const d of drivers) {
+            const rnd = seed(d.name);
+            const rankBonus = Math.max(0, 22 - (d.position || 22));
+            // pace: 60-95 based on standings position
+            d.stats = {
+                pace:        Math.min(98, Math.round(62 + rankBonus * 1.6 + rnd() * 8)),
+                consistency: Math.min(98, Math.round(60 + rankBonus * 1.3 + rnd() * 12)),
+                qualifying:  Math.min(98, Math.round(60 + rankBonus * 1.5 + rnd() * 10)),
+                wet:         Math.min(98, Math.round(55 + rnd() * 40))
+            };
+        }
+        for (const t of teams) {
+            const rnd = seed(t.name);
+            const rankBonus = Math.max(0, 11 - (t.position || 11));
+            t.stats = {
+                carPace:     Math.min(98, Math.round(58 + rankBonus * 3.4 + rnd() * 6)),
+                reliability: Math.min(98, Math.round(70 + rnd() * 25))
+            };
+        }
+
+        // =========================================================
+        //   Utility: assign lineup
+        // =========================================================
+        function shuffle(arr, r = Math.random) {
+            const a = arr.slice();
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(r() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function autoAssign() {
+            // 2 drivers per team; extras go to reserve
+            const shuffledDrivers = shuffle(drivers);
+            const lineup = {}; // teamName → [driverName, driverName]
+            const reserve = [];
+            for (const t of teams) lineup[t.name] = [];
+            for (const d of shuffledDrivers) {
+                const target = teams.find(t => lineup[t.name].length < 2);
+                if (target) lineup[target.name].push(d.name);
+                else reserve.push(d.name);
+            }
+            return { lineup, reserve };
+        }
+
+        // =========================================================
+        //   RACE SIMULATION
+        // =========================================================
+        // DNF causes — some mechanical, some collision (deterministic-random per race)
+        const MECH_CAUSES = [
+            { cause: 'engine failure', icon: '🔧' },
+            { cause: 'gearbox failure', icon: '⚙️' },
+            { cause: 'hydraulic failure', icon: '🛢️' },
+            { cause: 'a brake issue', icon: '🛑' },
+            { cause: 'power unit issue', icon: '⚡' },
+            { cause: 'overheating', icon: '🔥' },
+            { cause: 'a fuel system problem', icon: '⛽' },
+            { cause: 'an ERS failure', icon: '🔋' }
+        ];
+        const CRASH_CAUSES = [
+            { cause: (t, l) => `crashed out at Turn ${t} on lap ${l}`, icon: '💥' },
+            { cause: (t, l) => `collision damage from lap ${l}`, icon: '💥' },
+            { cause: (t, l) => `spun off at Turn ${t}`, icon: '🌀' },
+            { cause: (t, l) => `a puncture on lap ${l}`, icon: '🕳' },
+            { cause: (t, l) => `contact with another car on lap ${l}`, icon: '💥' }
+        ];
+
+        // -------------- TRACK CHARACTER --------------
+        // Different tracks reward different traits. Street tracks reward consistency + qualifying
+        // (harder to overtake, so grid position matters more), power tracks reward raw pace, etc.
+        function getTrackTraits(race) {
+            const n = (race.name || '').toLowerCase();
+            const c = (race.circuit || '').toLowerCase();
+            if (n.includes('monaco') || n.includes('singapore') || n.includes('las vegas') ||
+                n.includes('azerbaijan') || n.includes('miami') || n.includes('madrid')) {
+                return { type: 'street', qualiWeight: 0.75, gridStickiness: 0.9,
+                    rewardsQ: 0.18, rewardsC: 0.18, wetChance: 0.15 };
+            }
+            if (n.includes('italian') || n.includes('belgian') ||
+                c.includes('monza') || c.includes('spa')) {
+                return { type: 'power', qualiWeight: 0.5, gridStickiness: 0.3,
+                    rewardsP: 0.22, wetChance: 0.30 };
+            }
+            if (n.includes('hungarian') || n.includes('dutch') || n.includes('spanish') ||
+                c.includes('zandvoort') || c.includes('hungaroring') || c.includes('catalunya')) {
+                return { type: 'technical', qualiWeight: 0.65, gridStickiness: 0.7,
+                    rewardsQ: 0.14, rewardsP: 0.10, wetChance: 0.22 };
+            }
+            if (n.includes('british') || n.includes('brazil') || n.includes('japan') ||
+                n.includes('belgian') || n.includes('mexico')) {
+                return { type: 'classic', qualiWeight: 0.55, gridStickiness: 0.45,
+                    rewardsP: 0.15, wetChance: 0.35 };
+            }
+            return { type: 'standard', qualiWeight: 0.55, gridStickiness: 0.5,
+                rewardsP: 0.10, wetChance: 0.22 };
+        }
+
+        // -------------- WEEKEND FORM --------------
+        // Most weekends are normal noise. Small chance of a big outlier day
+        // (either great or awful) — this is what creates upsets like Gasly's Monza pole.
+        function weekendForm(rnd) {
+            const roll = rnd();
+            const dir = rnd() < 0.5 ? -1 : 1;
+            if (roll < 0.03) return dir * (18 + rnd() * 8);   // 3% chance of ±(18-26) — massive outlier
+            if (roll < 0.12) return dir * (9 + rnd() * 6);    // 9% chance of ±(9-15)  — meaningful swing
+            return (rnd() - 0.5) * 10;                        // normal noise ±5
+        }
+
+        // -------------- MOMENTUM --------------
+        // Recent race history shapes the driver's confidence. Recent wins/podiums help,
+        // recent DNFs hurt. Small effect but stacks over a bad streak.
+        function computeMomentum(state) {
+            const m = {};
+            const recent = state.raceResults.slice(-3);
+            for (const race of recent) {
+                for (const r of race.results) {
+                    if (!m[r.driver]) m[r.driver] = 0;
+                    if (r.dnf) m[r.driver] -= 1.5;
+                    else if (r.position === 1) m[r.driver] += 2.0;
+                    else if (r.position <= 3) m[r.driver] += 1.0;
+                    else if (r.position >= 16) m[r.driver] -= 0.7;
+                }
+            }
+            return m;
+        }
+
+        function simulateRace(state, raceIndex) {
+            const race = races[raceIndex];
+            const rnd = seed('race' + raceIndex + '_' + state.seasonId);
+            const totalLaps = race.laps || 55;
+            const track = getTrackTraits(race);
+            const isWet = rnd() < track.wetChance;
+            const momentum = computeMomentum(state);
+
+            // Team weekend swing — some teams over/underperform their normal car pace this weekend.
+            // Rare 8% outlier day makes a car unusually fast (or slow).
+            const teamMod = {};
+            for (const t of teams) {
+                const swing = (rnd() - 0.5) * 8;
+                const outlier = rnd() < 0.08 ? (rnd() < 0.5 ? -14 : 14) : 0;
+                teamMod[t.name] = swing + outlier;
+            }
+
+            // Store per-driver weekend form so quali and race use the SAME daily luck
+            const dailyFormMap = {};
+
+            // ---------- QUALIFYING (produces grid) ----------
+            const gridPool = [];
+            for (const [teamName, driverNames] of Object.entries(state.lineup)) {
+                const team = teams.find(t => t.name === teamName);
+                if (!team) continue;
+                for (const dName of driverNames) {
+                    const d = drivers.find(x => x.name === dName);
+                    if (!d) continue;
+                    const dailyForm = weekendForm(rnd);
+                    dailyFormMap[dName] = dailyForm;
+
+                    let qScore = 0.55 * d.stats.qualifying + 0.35 * team.stats.carPace
+                               + (rnd() - 0.5) * 14
+                               + dailyForm * 0.8
+                               + (teamMod[teamName] || 0) * 0.6
+                               + (momentum[dName] || 0) * 0.4;
+                    // Track bonuses for qualifying-friendly circuits
+                    if (track.rewardsQ) qScore += (d.stats.qualifying - 78) * track.rewardsQ;
+                    if (track.rewardsC) qScore += (d.stats.consistency - 78) * track.rewardsC;
+                    if (isWet) qScore += (d.stats.wet - 70) * 0.22;
+
+                    gridPool.push({ driver: dName, team: teamName, qScore });
+                }
+            }
+            gridPool.sort((a, b) => b.qScore - a.qScore);
+            const gridMap = {};
+            gridPool.forEach((g, i) => { gridMap[g.driver] = i + 1; });
+            const poleSitter = gridPool[0]?.driver || null;
+
+            // ---------- RACE ----------
+            const scored = [];
+            for (const [teamName, driverNames] of Object.entries(state.lineup)) {
+                const team = teams.find(t => t.name === teamName);
+                if (!team) continue;
+                for (const dName of driverNames) {
+                    const d = drivers.find(x => x.name === dName);
+                    if (!d) continue;
+                    const dnfChance = (100 - team.stats.reliability) / 100 * 0.30 + 0.03;
+                    const dnf = rnd() < dnfChance;
+                    const dailyForm = dailyFormMap[dName] || 0;
+                    const gridPos = gridMap[dName] || 22;
+
+                    let score = 0.5 * d.stats.pace + 0.4 * team.stats.carPace;
+                    // Race noise is wider than quali — scaled by consistency
+                    score += (rnd() - 0.5) * (110 - d.stats.consistency) * 0.6;
+                    // Same weekend form carries through — full swing in the race
+                    score += dailyForm * 1.0;
+                    score += (teamMod[teamName] || 0) * 0.9;
+                    score += (momentum[dName] || 0) * 0.7;
+                    // Track pace bonus
+                    if (track.rewardsP) score += (d.stats.pace - 78) * track.rewardsP;
+                    if (isWet) score += (d.stats.wet - 70) * 0.3;
+                    // Grid stickiness — tracks where overtaking is hard, keep grid pos more.
+                    // Boost for higher grid spots, penalty for lower.
+                    score += (12 - gridPos) * track.gridStickiness * 0.4;
+
+                    // DNF reason
+                    let dnfReason = null;
+                    let dnfLap = null;
+                    if (dnf) {
+                        if (rnd() < 0.55) {
+                            const pick = MECH_CAUSES[Math.floor(rnd() * MECH_CAUSES.length)];
+                            dnfLap = 5 + Math.floor(rnd() * (totalLaps - 8));
+                            dnfReason = { cause: pick.cause, icon: pick.icon, lap: dnfLap };
+                        } else {
+                            const pick = CRASH_CAUSES[Math.floor(rnd() * CRASH_CAUSES.length)];
+                            const turn = 1 + Math.floor(rnd() * 15);
+                            dnfLap = 1 + Math.floor(rnd() * (totalLaps - 3));
+                            dnfReason = { cause: pick.cause(turn, dnfLap), icon: pick.icon, lap: dnfLap };
+                        }
+                    }
+
+                    scored.push({
+                        driver: dName, team: teamName,
+                        primaryColor: team.primaryColor || '#e10600',
+                        score, dnf, dnfReason, rnd: rnd(), dailyForm
+                    });
+                }
+            }
+            scored.sort((a, b) => (a.dnf - b.dnf) || (b.score - a.score));
+
+            // ---------- SAFETY CAR CHAOS ----------
+            // ~35% of races get a safety car. When it happens, there's a small chance
+            // of adjacent-position swaps in the top 10 (pit stop timing chaos).
+            let safetyCar = null;
+            if (rnd() < 0.35) {
+                const scLap = 4 + Math.floor(rnd() * (totalLaps * 0.5));
+                const scReasons = [
+                    'debris on the racing line',
+                    'a stranded car in a dangerous position',
+                    'a first-lap incident at Turn ' + (1 + Math.floor(rnd() * 8)),
+                    'a mid-pack collision',
+                    'contact between two backmarkers'
+                ];
+                const reason = scReasons[Math.floor(rnd() * scReasons.length)];
+                safetyCar = { lap: scLap, reason };
+                // Chance of swapping adjacent finishers in points-scoring range
+                for (let i = 2; i < Math.min(9, scored.length - 1); i++) {
+                    if (rnd() < 0.20 && !scored[i].dnf && !scored[i + 1].dnf) {
+                        [scored[i], scored[i + 1]] = [scored[i + 1], scored[i]];
+                    }
+                }
+            }
+
+            const pointsMap = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
+            let leaderScore = null;
+            const results = scored.map((r, i) => {
+                const position = i + 1;
+                const points = r.dnf ? 0 : (pointsMap[i] || 0);
+                let gap;
+                if (r.dnf) gap = 'DNF';
+                else if (i === 0) { leaderScore = r.score; gap = 'RACE WINNER'; }
+                else {
+                    const behind = (leaderScore - r.score);
+                    const secs = Math.max(0.3, behind * 0.6 + r.rnd * 2);
+                    gap = '+' + secs.toFixed(3);
+                }
+                return {
+                    position, gap, points,
+                    driver: r.driver, team: r.team,
+                    primaryColor: r.primaryColor, dnf: r.dnf,
+                    dnfReason: r.dnfReason,
+                    grid: gridMap[r.driver] || 22,
+                    dailyForm: r.dailyForm
+                };
+            });
+
+            // Compute championship standing snapshot BEFORE this race, for surprise stories
+            const standingsBefore = {};
+            for (const [tName, drvs] of Object.entries(state.lineup)) {
+                for (const d of drvs) standingsBefore[d] = { pts: 0, pos: 99 };
+            }
+            for (const past of state.raceResults) {
+                for (const r of past.results) {
+                    if (standingsBefore[r.driver]) standingsBefore[r.driver].pts += r.points;
+                }
+            }
+            const sortedBefore = Object.entries(standingsBefore)
+                .sort((a, b) => b[1].pts - a[1].pts);
+            sortedBefore.forEach(([name], i) => { standingsBefore[name].pos = i + 1; });
+
+            const report = buildReport(results, isWet, race, {
+                poleSitter, safetyCar, track, standingsBefore
+            });
+
+            return { round: race.round, name: race.name, circuit: race.circuit,
+                     country: race.country, isWet, gridMap, results, report, safetyCar };
+        }
+
+        function buildReport(results, isWet, race, ctx) {
+            const events = [];
+            const winner = results[0];
+            const runnerUp = results[1];
+            const track = ctx?.track || {};
+            const poleSitter = ctx?.poleSitter;
+            const safetyCar = ctx?.safetyCar;
+            const before = ctx?.standingsBefore || {};
+
+            // ---- Shock pole ----
+            // If the pole-sitter's championship position is well outside the top 5, that's an upset.
+            if (poleSitter) {
+                const poleInfo = before[poleSitter];
+                if (poleInfo && poleInfo.pos >= 8) {
+                    const poleRow = results.find(r => r.driver === poleSitter);
+                    const team = poleRow?.team || '';
+                    events.push({ icon: '⚡', title: `SHOCK POLE: ${poleSitter} grabs P1`,
+                        text: `${team} pulled it out of nowhere — the ${nth(poleInfo.pos)}-placed driver in the championship starts the ${race.name}${race.name.includes('Grand Prix') ? '' : ' Grand Prix'} on pole.` });
+                } else if (poleInfo && poleInfo.pos >= 4 && poleInfo.pos <= 7) {
+                    const poleRow = results.find(r => r.driver === poleSitter);
+                    events.push({ icon: '🔥', title: `${poleSitter} snatches pole`,
+                        text: `${poleRow?.team || ''} beat the front-runners in qualifying — a big Saturday for their weekend.` });
+                }
+            }
+
+            // ---- Winner storyline ----
+            if (winner && !winner.dnf) {
+                const winnerBefore = before[winner.driver];
+                const isChampionshipUnderdog = winnerBefore && winnerBefore.pos >= 8;
+                if (winner.grid === 1) {
+                    events.push({ icon: '🏆', title: `${winner.driver} converts pole into victory`,
+                        text: `A textbook lights-to-flag win for ${winner.team}. No mistakes, no surprises.` });
+                } else if (winner.grid >= 8) {
+                    events.push({ icon: '🚀', title: `${winner.driver} storms from P${winner.grid} to win`,
+                        text: `An extraordinary drive — carved through ${winner.grid - 1} cars for a stunning victory.` });
+                } else if (winner.grid >= 5) {
+                    events.push({ icon: '🏁', title: `${winner.driver} wins from P${winner.grid}`,
+                        text: `${winner.team} nailed the strategy — a strong overtaking drive up the order.` });
+                } else {
+                    events.push({ icon: '🏆', title: `${winner.driver} takes the win from P${winner.grid}`,
+                        text: `A clean weekend from the ${winner.team} camp.` });
+                }
+                if (isChampionshipUnderdog) {
+                    events.push({ icon: '🎉', title: `UNEXPECTED WINNER`,
+                        text: `${winner.driver} sits ${nth(winnerBefore.pos)} in the standings — nobody had them on their bingo card for this one.` });
+                }
+            }
+
+            // ---- Dominant / photo finish ----
+            if (runnerUp && !runnerUp.dnf && runnerUp.gap.startsWith('+')) {
+                const gapSecs = parseFloat(runnerUp.gap.replace('+', ''));
+                if (gapSecs > 20) {
+                    events.push({ icon: '💨', title: 'Dominant winning margin',
+                        text: `${runnerUp.driver} crossed the line ${runnerUp.gap}s behind — no answer for the leader all afternoon.` });
+                } else if (gapSecs < 1.2) {
+                    events.push({ icon: '📸', title: 'Photo finish for the win',
+                        text: `${runnerUp.driver} finished just ${runnerUp.gap}s behind — one of the tightest wins of the season.` });
+                }
+            }
+
+            // ---- Track character note (opening) ----
+            if (track.type === 'street' && !isWet) {
+                events.push({ icon: '🏙', title: 'Street-circuit chess',
+                    text: 'Tight walls, no run-off — track position was everything. Overtakes came at a premium.' });
+            } else if (track.type === 'power') {
+                events.push({ icon: '💨', title: 'Slipstream battles',
+                    text: 'Long straights meant DRS trains and late braking — the low-downforce specialists loved it.' });
+            }
+
+            // ---- Safety car ----
+            if (safetyCar) {
+                events.push({ icon: '🚨', title: `Safety car on lap ${safetyCar.lap}`,
+                    text: `Called out for ${safetyCar.reason}. The neutralisation reshuffled pit strategies and closed the field back up.` });
+            }
+
+            // ---- Recovery + disaster ----
+            for (const r of results) {
+                if (r.dnf) continue;
+                const gained = r.grid - r.position;
+                if (gained >= 6 && r.position <= 12) {
+                    events.push({ icon: '📈', title: `${r.driver}: recovery drive`,
+                        text: `Started P${r.grid}, finished P${r.position} — a ${gained}-place charge through the field.` });
+                }
+                if (r.grid <= 5 && r.position - r.grid >= 6) {
+                    events.push({ icon: '📉', title: `${r.driver}'s afternoon unravels`,
+                        text: `Qualified P${r.grid} but slid to P${r.position}. A weekend to forget for ${r.team}.` });
+                }
+            }
+
+            // ---- Star-driver blows it (any top-3-in-championship driver finishing outside points) ----
+            for (const r of results) {
+                if (r.dnf) continue;
+                const b = before[r.driver];
+                if (b && b.pos <= 3 && r.position >= 11) {
+                    events.push({ icon: '😬', title: `Nightmare for ${r.driver}`,
+                        text: `The championship ${nth(b.pos)}-place driver finishes P${r.position} — zero points, and the title fight tightens.` });
+                }
+            }
+
+            // ---- DNFs with causes ----
+            for (const r of results) {
+                if (r.dnf && r.dnfReason) {
+                    events.push({ icon: r.dnfReason.icon,
+                        title: `${r.driver} retires with ${r.dnfReason.cause}`,
+                        text: `${r.team}'s race is over on lap ${r.dnfReason.lap}. Started P${r.grid}.` });
+                }
+            }
+
+            // ---- Battles ----
+            for (let i = 0; i < Math.min(9, results.length - 1); i++) {
+                const a = results[i];
+                const b2 = results[i + 1];
+                if (a.dnf || b2.dnf) continue;
+                const gapA = i === 0 ? 0 : parseFloat(a.gap.replace('+', ''));
+                const gapB = parseFloat(b2.gap.replace('+', ''));
+                const battleGap = gapB - gapA;
+                if (battleGap > 0 && battleGap < 1.0) {
+                    events.push({ icon: '⚔️', title: `Battle for P${i + 2}`,
+                        text: `${a.driver} held off ${b2.driver} by just ${battleGap.toFixed(3)}s at the flag.` });
+                }
+            }
+
+            // ---- Wet race context ----
+            if (isWet) {
+                events.push({ icon: '🌧', title: 'Rain shuffled the deck',
+                    text: 'Wet conditions rewarded drivers with strong feel in tricky grip — and punished a few big names.' });
+            }
+
+            return events.slice(0, 14);
+        }
+
+        function nth(n) {
+            if (!n) return '';
+            const s = ['th', 'st', 'nd', 'rd'], v = n % 100;
+            return n + (s[(v - 20) % 10] || s[v] || s[0]);
+        }
+
+        // =========================================================
+        //   RENDERING
+        // =========================================================
+        const app = document.getElementById('app');
+        const navReset = document.getElementById('navReset');
+        const navHome = document.getElementById('navHome');
+        navHome.addEventListener('click', () => location.href = '/');
+        navReset.addEventListener('click', () => {
+            if (confirm('Reset your season? This cannot be undone.')) {
+                wipeState();
+                render();
+            }
+        });
+
+        function toast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('visible');
+            clearTimeout(t._timer);
+            t._timer = setTimeout(() => t.classList.remove('visible'), 2200);
+        }
+
+        function render() {
+            const state = loadState();
+            navReset.style.display = state ? '' : 'none';
+            if (!state) return renderLanding();
+            if (state.mode === 'assigning') return renderAssign(state);
+            return renderDashboard(state);
+        }
+
+        // ----- LANDING -----
+        function renderLanding() {
+            const existing = loadState();
+            app.innerHTML = `
+                <div class="eyebrow">Season Manager</div>
+                <h1 class="title">Start Your Own <span class="accent">Season</span></h1>
+                <p class="subtitle">Shuffle the grid, pick your driver lineups, and simulate every race of the season based on driver &amp; team stats. Follow the championship battle you built.</p>
+
+                ${existing ? `
+                <div class="continue-banner">
+                    <div>
+                        <h3>You have an in-progress season</h3>
+                        <p>Round ${(existing.raceResults || []).length + 1} of ${races.length} · Leader: <strong>${leaderOf(existing) || '—'}</strong></p>
+                    </div>
+                    <div class="btns">
+                        <button class="btn" id="continueBtn">Continue →</button>
+                        <button class="btn ghost" id="freshBtn">Start Fresh</button>
+                    </div>
+                </div>` : ''}
+
+                <div class="mode-grid">
+                    <button class="mode-card" id="quickBtn">
+                        <span class="mode-icon">⚡</span>
+                        <h2>Quick Season</h2>
+                        <p>Randomly assigns all 22 drivers to teams. Jump straight into simulating races. Perfect for a chaotic what-if run.</p>
+                        <span class="cta">Start random season →</span>
+                    </button>
+                    <button class="mode-card" id="customBtn">
+                        <span class="mode-icon">🎯</span>
+                        <h2>Custom Season</h2>
+                        <p>Pick which driver goes to which team. Assemble your dream teams — Verstappen to Ferrari? Hamilton to Cadillac? You decide.</p>
+                        <span class="cta">Choose lineups →</span>
+                    </button>
+                </div>
+            `;
+            document.getElementById('quickBtn').addEventListener('click', () => startQuickSeason());
+            document.getElementById('customBtn').addEventListener('click', () => startCustomSeason());
+            if (existing) {
+                document.getElementById('continueBtn').addEventListener('click', () => render());
+                document.getElementById('freshBtn').addEventListener('click', () => {
+                    if (confirm('Discard your current season and start over?')) { wipeState(); renderLanding(); }
+                });
+                // "Continue" just proceeds — but we already rendered landing; simulate re-render
+                document.getElementById('continueBtn').addEventListener('click', () => { render(); });
+            }
+        }
+
+        function leaderOf(state) {
+            const totals = computeDriverTotals(state);
+            if (!totals.length) return null;
+            return totals[0].name;
+        }
+
+        function startQuickSeason() {
+            const { lineup } = autoAssign();
+            const state = {
+                mode: 'racing',
+                seasonId: Date.now().toString(36),
+                lineup,
+                raceResults: [],
+                createdAt: Date.now()
+            };
+            saveState(state);
+            render();
+        }
+        function startCustomSeason() {
+            // Empty lineup — user assigns
+            const lineup = {};
+            for (const t of teams) lineup[t.name] = [];
+            const state = {
+                mode: 'assigning',
+                seasonId: Date.now().toString(36),
+                lineup,
+                raceResults: [],
+                createdAt: Date.now()
+            };
+            saveState(state);
+            render();
+        }
+
+        // ----- ASSIGN -----
+        function renderAssign(state) {
+            const assigned = new Set(Object.values(state.lineup).flat());
+            const unassigned = drivers.filter(d => !assigned.has(d.name));
+
+            app.innerHTML = `
+                <div class="eyebrow">Custom Lineup</div>
+                <h1 class="title">Assign Drivers to <span class="accent">Teams</span></h1>
+                <p class="subtitle">Click a driver, then click a team seat to place them. Two drivers per team, 11 teams, 22 seats total.</p>
+
+                <div class="assign-layout">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Available Drivers</h3>
+                            <span class="hint">Click to select</span>
+                        </div>
+                        <div class="driver-list" id="driverList"></div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Teams (${teams.length})</h3>
+                            <span class="hint">Click an empty seat</span>
+                        </div>
+                        <div id="teamList"></div>
+                    </div>
+
+                    <div class="assign-actions">
+                        <div class="status">
+                            <span class="count" id="assignCount">${assigned.size}</span> / ${Math.min(22, teams.length * 2)} drivers placed
+                        </div>
+                        <div class="buttons">
+                            <button class="btn ghost" id="autoFillBtn">Auto-fill rest</button>
+                            <button class="btn ghost" id="clearAllBtn">Clear all</button>
+                            <button class="btn" id="startBtn" ${assigned.size < Math.min(22, teams.length * 2) ? 'disabled style="opacity:0.4;cursor:not-allowed"' : ''}>Start Season →</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            let selectedDriver = null;
+            const renderDriverList = () => {
+                const list = document.getElementById('driverList');
+                if (unassigned.length === 0) {
+                    list.innerHTML = `<div class="empty-state">All drivers placed! Hit <strong>Start Season</strong>.</div>`;
+                    return;
+                }
+                list.innerHTML = unassigned.map(d => `
+                    <div class="driver-pill ${d.name === selectedDriver ? 'selected' : ''}" data-name="${d.name}">
+                        <div class="driver-num">${d.driverNumber || '?'}</div>
+                        <div class="info">
+                            <div class="name">${d.name}</div>
+                            <div class="team">Real team: ${d.team || '—'}</div>
+                        </div>
+                        <div class="stats">
+                            <span class="stat-chip">PAC ${d.stats.pace}</span>
+                            <span class="stat-chip">QUA ${d.stats.qualifying}</span>
+                        </div>
+                    </div>
+                `).join('');
+                list.querySelectorAll('.driver-pill').forEach(el => {
+                    el.addEventListener('click', () => {
+                        selectedDriver = selectedDriver === el.dataset.name ? null : el.dataset.name;
+                        renderDriverList();
+                    });
+                });
+            };
+
+            const renderTeamList = () => {
+                const list = document.getElementById('teamList');
+                list.innerHTML = teams.map(t => `
+                    <div class="team-slot" style="--team: ${t.primaryColor || '#e10600'}">
+                        <div class="team-slot-header">
+                            <h4>${t.name}</h4>
+                            <span class="rating">PACE ${t.stats.carPace} · REL ${t.stats.reliability}</span>
+                        </div>
+                        <div class="seats">
+                            ${[0, 1].map(i => {
+                                const drv = state.lineup[t.name][i];
+                                if (drv) {
+                                    return `<div class="seat" data-team="${t.name}" data-slot="${i}">
+                                        <span class="name">${drv}</span>
+                                        <button class="clear" data-team="${t.name}" data-clear="${drv}">×</button>
+                                    </div>`;
+                                }
+                                return `<div class="seat empty" data-team="${t.name}" data-slot="${i}">
+                                    Empty seat
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                `).join('');
+                list.querySelectorAll('.seat').forEach(el => {
+                    el.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('clear')) return;
+                        if (!selectedDriver) { toast('Pick a driver on the left first'); return; }
+                        const team = el.dataset.team;
+                        const slot = parseInt(el.dataset.slot, 10);
+                        if (state.lineup[team].length >= 2 && !state.lineup[team][slot]) return;
+                        // Replace or place
+                        state.lineup[team][slot] = selectedDriver;
+                        // Rebuild unassigned
+                        unassigned.splice(unassigned.findIndex(d => d.name === selectedDriver), 1);
+                        selectedDriver = null;
+                        saveState(state);
+                        updateAll();
+                    });
+                });
+                list.querySelectorAll('.clear').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const team = btn.dataset.team;
+                        const drv = btn.dataset.clear;
+                        state.lineup[team] = state.lineup[team].filter(x => x !== drv);
+                        const drvObj = drivers.find(d => d.name === drv);
+                        if (drvObj) unassigned.push(drvObj);
+                        unassigned.sort((a, b) => (a.position || 999) - (b.position || 999));
+                        saveState(state);
+                        updateAll();
+                    });
+                });
+            };
+
+            const updateAll = () => {
+                const total = Object.values(state.lineup).flat().length;
+                document.getElementById('assignCount').textContent = total;
+                const startBtn = document.getElementById('startBtn');
+                const target = Math.min(22, teams.length * 2);
+                if (total >= target) {
+                    startBtn.removeAttribute('disabled');
+                    startBtn.style.opacity = '';
+                    startBtn.style.cursor = '';
+                } else {
+                    startBtn.setAttribute('disabled', '');
+                    startBtn.style.opacity = '0.4';
+                    startBtn.style.cursor = 'not-allowed';
+                }
+                renderDriverList();
+                renderTeamList();
+            };
+
+            document.getElementById('autoFillBtn').addEventListener('click', () => {
+                // Fill remaining seats with remaining drivers
+                const remaining = shuffle(unassigned);
+                for (const d of remaining) {
+                    const target = teams.find(t => state.lineup[t.name].length < 2);
+                    if (!target) break;
+                    state.lineup[target.name].push(d.name);
+                }
+                unassigned.length = 0;
+                saveState(state);
+                updateAll();
+            });
+            document.getElementById('clearAllBtn').addEventListener('click', () => {
+                if (!confirm('Clear all assignments?')) return;
+                for (const t of teams) state.lineup[t.name] = [];
+                unassigned.length = 0;
+                for (const d of drivers) unassigned.push(d);
+                saveState(state);
+                updateAll();
+            });
+            document.getElementById('startBtn').addEventListener('click', () => {
+                state.mode = 'racing';
+                saveState(state);
+                render();
+            });
+
+            updateAll();
+        }
+
+        // ----- DASHBOARD -----
+        function computeDriverTotals(state) {
+            const totals = {};
+            for (const [teamName, drvs] of Object.entries(state.lineup)) {
+                for (const d of drvs) {
+                    if (!totals[d]) totals[d] = { name: d, team: teamName, points: 0, wins: 0 };
+                }
+            }
+            for (const race of state.raceResults) {
+                for (const r of race.results) {
+                    if (!totals[r.driver]) continue;
+                    totals[r.driver].points += r.points;
+                    if (r.position === 1 && !r.dnf) totals[r.driver].wins += 1;
+                }
+            }
+            return Object.values(totals).sort((a, b) => b.points - a.points || b.wins - a.wins);
+        }
+        function computeTeamTotals(state) {
+            const totals = {};
+            for (const teamName of Object.keys(state.lineup)) {
+                totals[teamName] = { name: teamName, points: 0, wins: 0 };
+            }
+            for (const race of state.raceResults) {
+                for (const r of race.results) {
+                    if (!totals[r.team]) continue;
+                    totals[r.team].points += r.points;
+                    if (r.position === 1 && !r.dnf) totals[r.team].wins += 1;
+                }
+            }
+            return Object.values(totals).sort((a, b) => b.points - a.points || b.wins - a.wins);
+        }
+
+        let currentTab = 'drivers';
+
+        function renderDashboard(state) {
+            const completed = state.raceResults.length;
+            const total = races.length;
+            const nextRace = races[completed];
+            const isComplete = completed >= total;
+
+            app.innerHTML = `
+                <div class="season-topbar">
+                    <div>
+                        <div class="eyebrow">My Season</div>
+                        <h1 class="title">Championship <span class="accent">Progress</span></h1>
+                        <div class="meta">
+                            Round <span class="num">${completed}</span> of <span class="num">${total}</span> completed
+                            ${isComplete ? ' · <strong style="color: var(--gold)">Season complete! 🏆</strong>' : ''}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        ${isComplete ? '' : `<button class="btn" id="simRaceBtn">▶ Simulate ${nextRace?.name?.replace(' Grand Prix', ' GP') || 'Race'}</button>`}
+                        ${completed > 0 && !isComplete ? '<button class="btn ghost" id="simSeasonBtn">⏭ Simulate remaining</button>' : ''}
+                        ${isComplete ? '<button class="btn" id="newSeasonBtn">🎮 New Season</button>' : ''}
+                    </div>
+                </div>
+
+                <div class="dash-grid">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Race Calendar</h3>
+                            <span class="hint">${completed}/${total}</span>
+                        </div>
+                        <div class="race-list" id="raceList"></div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Championship Standings</h3>
+                        </div>
+                        <div class="standings-tabs">
+                            <button class="tab ${currentTab === 'drivers' ? 'active' : ''}" data-tab="drivers">Drivers</button>
+                            <button class="tab ${currentTab === 'teams' ? 'active' : ''}" data-tab="teams">Constructors</button>
+                        </div>
+                        <div id="standingsBox"></div>
+                    </div>
+                </div>
+            `;
+
+            // Race list
+            const rl = document.getElementById('raceList');
+            rl.innerHTML = races.map((r, i) => {
+                const done = i < completed;
+                const isNext = !done && i === completed;
+                const result = done ? state.raceResults[i] : null;
+                const winner = result?.results?.find(x => x.position === 1);
+                const dateStr = new Date(r.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                return `
+                    <div class="race-row ${done ? 'done' : ''} ${isNext ? 'next' : ''}">
+                        <div class="rnum">${r.round}</div>
+                        <div>
+                            <div class="rname">${r.name.replace(' Grand Prix', ' GP')}</div>
+                            <div class="rmeta">${r.country} · ${dateStr}${result?.isWet ? ' · 🌧 Wet' : ''}</div>
+                            ${winner ? `<div class="rwinner">🏆 ${winner.driver}</div>` : ''}
+                        </div>
+                        <div>
+                            ${done ? `<button class="rlink" data-race="${i}">Results →</button>` : ''}
+                            ${isNext ? `<button class="rlink" data-sim="${i}">Simulate →</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            rl.querySelectorAll('[data-race]').forEach(b => b.addEventListener('click', () => {
+                showRaceResults(state.raceResults[+b.dataset.race], races[+b.dataset.race]);
+            }));
+            rl.querySelectorAll('[data-sim]').forEach(b => b.addEventListener('click', () => {
+                simulateNextRace(state);
+            }));
+            // Scroll next race into view
+            const nextEl = rl.querySelector('.race-row.next');
+            if (nextEl) nextEl.scrollIntoView({ block: 'center' });
+
+            // Standings box
+            renderStandingsBox(state);
+            document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => {
+                currentTab = b.dataset.tab;
+                document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === currentTab));
+                renderStandingsBox(state);
+            }));
+
+            const simBtn = document.getElementById('simRaceBtn');
+            if (simBtn) simBtn.addEventListener('click', () => simulateNextRace(state));
+            const simSeasonBtn = document.getElementById('simSeasonBtn');
+            if (simSeasonBtn) simSeasonBtn.addEventListener('click', () => simulateRemaining(state));
+            const newBtn = document.getElementById('newSeasonBtn');
+            if (newBtn) newBtn.addEventListener('click', () => {
+                if (confirm('Start a new season? Your current one will be discarded.')) {
+                    wipeState(); render();
+                }
+            });
+        }
+
+        function renderStandingsBox(state) {
+            const box = document.getElementById('standingsBox');
+            if (currentTab === 'drivers') {
+                const totals = computeDriverTotals(state);
+                box.innerHTML = `
+                    <table class="standings-table">
+                        <thead>
+                            <tr><th>#</th><th>Driver</th><th style="text-align:right">Wins</th><th style="text-align:right">PTS</th></tr>
+                        </thead>
+                        <tbody>
+                        ${totals.map((d, i) => {
+                            const pos = i + 1;
+                            const team = teams.find(t => t.name === d.team);
+                            const color = team?.primaryColor || '#666';
+                            return `<tr>
+                                <td class="pos p${pos <= 3 ? pos : ''}">${pos}</td>
+                                <td>
+                                    <span class="team-color" style="--team: ${color}"></span>
+                                    <span class="name">${d.name}</span>
+                                    <div class="team-name">${d.team}</div>
+                                </td>
+                                <td class="wins">${d.wins}</td>
+                                <td class="pts">${d.points}</td>
+                            </tr>`;
+                        }).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                const totals = computeTeamTotals(state);
+                box.innerHTML = `
+                    <table class="standings-table">
+                        <thead>
+                            <tr><th>#</th><th>Constructor</th><th style="text-align:right">Wins</th><th style="text-align:right">PTS</th></tr>
+                        </thead>
+                        <tbody>
+                        ${totals.map((t, i) => {
+                            const pos = i + 1;
+                            const team = teams.find(x => x.name === t.name);
+                            const color = team?.primaryColor || '#666';
+                            const lineup = state.lineup[t.name] || [];
+                            return `<tr>
+                                <td class="pos p${pos <= 3 ? pos : ''}">${pos}</td>
+                                <td>
+                                    <span class="team-color" style="--team: ${color}"></span>
+                                    <span class="name">${t.name}</span>
+                                    <div class="team-name">${lineup.join(' · ')}</div>
+                                </td>
+                                <td class="wins">${t.wins}</td>
+                                <td class="pts">${t.points}</td>
+                            </tr>`;
+                        }).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+        }
+
+        function simulateNextRace(state) {
+            const idx = state.raceResults.length;
+            if (idx >= races.length) return;
+            const result = simulateRace(state, idx);
+            state.raceResults.push(result);
+            saveState(state);
+            showRaceResults(result, races[idx], /*fresh*/true);
+            render();
+        }
+
+        function simulateRemaining(state) {
+            if (!confirm('Simulate all remaining races?')) return;
+            while (state.raceResults.length < races.length) {
+                const idx = state.raceResults.length;
+                state.raceResults.push(simulateRace(state, idx));
+            }
+            saveState(state);
+            render();
+            toast('Season complete!');
+        }
+
+        function showRaceResults(result, raceMeta, fresh = false) {
+            const backdrop = document.getElementById('modalBackdrop');
+            const content = document.getElementById('modalContent');
+            const dateStr = raceMeta ? new Date(raceMeta.date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) : '';
+            const events = result.report || [];
+            content.innerHTML = `
+                <div class="banner">
+                    <div class="eyebrow">Round ${result.round} · ${fresh ? 'JUST RACED' : 'Result'}</div>
+                    <h2>${result.name}</h2>
+                    <div class="circuit">${result.circuit} · ${result.country}</div>
+                </div>
+                <div class="conditions">
+                    <div class="cond">${dateStr}</div>
+                    ${result.isWet ? '<div class="cond wet">🌧 Wet race</div>' : '<div class="cond">☀ Dry race</div>'}
+                </div>
+
+                ${events.length ? `
+                <div class="report-section">
+                    <h3>📝 Race Report</h3>
+                    <div class="report-events">
+                        ${events.map(e => `
+                            <div class="report-event">
+                                <div class="event-icon">${e.icon}</div>
+                                <div class="event-body">
+                                    <div class="event-title">${e.title}</div>
+                                    <div class="event-text">${e.text}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>` : ''}
+
+                <button class="results-toggle" id="resultsToggle">📊 Full Classification ▾</button>
+                <div class="results-body" id="resultsBody">
+                ${result.results.map(r => {
+                    const gridInfo = r.grid ? `<span style="color: var(--text-muted); font-size: 0.7rem; margin-left: 0.4rem;">(P${r.grid})</span>` : '';
+                    return `
+                    <div class="result-row ${r.dnf ? 'dnf' : ''} p${r.position <= 3 ? r.position : ''}">
+                        <div class="pos">${r.position}</div>
+                        <div class="who">
+                            <div class="name">${r.driver}${gridInfo}</div>
+                            <div class="team-name">${r.team}${r.dnf && r.dnfReason ? ' · ' + r.dnfReason.cause : ''}</div>
+                        </div>
+                        <div class="gap">${r.gap}</div>
+                        <div class="pts ${r.points === 0 ? 'zero' : ''}">${r.points}</div>
+                    </div>
+                `;}).join('')}
+                </div>
+                <div class="modal-actions">
+                    <button class="btn ghost" id="closeModal">Close</button>
+                </div>
+            `;
+            backdrop.classList.add('visible');
+            document.getElementById('closeModal').addEventListener('click', () => {
+                backdrop.classList.remove('visible');
+            });
+            document.getElementById('resultsToggle').addEventListener('click', (e) => {
+                const body = document.getElementById('resultsBody');
+                body.classList.toggle('expanded');
+                e.target.textContent = body.classList.contains('expanded')
+                    ? '📊 Full Classification ▴'
+                    : '📊 Full Classification ▾';
+            });
+            backdrop.addEventListener('click', function once(e) {
+                if (e.target === backdrop) {
+                    backdrop.classList.remove('visible');
+                    backdrop.removeEventListener('click', once);
+                }
+            });
+        }
+
+        render();
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Standings Predictor · F1 Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0b12;
+            --bg-elev: #14141c;
+            --bg-elev-2: #1c1c26;
+            --panel: rgba(20, 20, 28, 0.85);
+            --text: #f5f5f7;
+            --text-dim: #a0a0ad;
+            --text-muted: #6e6e7a;
+            --border: rgba(120, 130, 160, 0.22);
+            --border-strong: rgba(160, 170, 200, 0.45);
+            --cyan: #47d1ff;
+            --purple: #a855f7;
+            --red: #e10600;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+            --up: #22c55e;
+            --down: #ef4444;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        *::-webkit-scrollbar { display: none; width: 0; height: 0; }
+        html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: 'Titillium Web', 'Segoe UI', sans-serif; }
+
+        .navbar {
+            background: rgba(11, 11, 18, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.85rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 50;
+        }
+        .navbar a.brand {
+            font-weight: 900; font-size: 1.05rem;
+            letter-spacing: 0.08em; text-decoration: none; color: var(--text);
+        }
+        .navbar .brand::before {
+            content: '⬅'; display: inline-block; margin-right: 0.5rem;
+            color: var(--cyan);
+        }
+        .navbar h1 {
+            font-size: 0.85rem; font-weight: 700;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--text-dim);
+        }
+        .navbar h1 .accent { color: var(--cyan); }
+        .navbar .actions { display: flex; gap: 0.5rem; }
+        .navbar .action {
+            background: transparent; border: 1px solid var(--border);
+            color: var(--text-dim); font-family: inherit;
+            font-size: 0.72rem; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            padding: 0.4rem 0.75rem; border-radius: 6px;
+            cursor: pointer; text-decoration: none;
+        }
+        .navbar .action:hover { border-color: var(--cyan); color: var(--cyan); }
+
+        .container {
+            max-width: 1400px; margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        .eyebrow {
+            color: var(--cyan); font-size: 0.75rem; font-weight: 800;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        h1.title { font-size: 2.4rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 0.35rem; }
+        h1.title .accent { color: var(--cyan); }
+        p.subtitle { color: var(--text-dim); font-size: 1rem; max-width: 720px; margin-bottom: 1.5rem; }
+
+        .race-banner {
+            background: linear-gradient(135deg, rgba(71, 209, 255, 0.15), rgba(168, 85, 247, 0.05));
+            border: 1px solid rgba(71, 209, 255, 0.35);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 1rem; flex-wrap: wrap;
+        }
+        .race-banner .round-tag {
+            background: var(--cyan); color: #001624;
+            padding: 0.35rem 0.75rem; border-radius: 999px;
+            font-size: 0.75rem; font-weight: 900;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            margin-bottom: 0.4rem; display: inline-block;
+        }
+        .race-banner h2 { font-size: 1.35rem; font-weight: 900; letter-spacing: -0.01em; }
+        .race-banner .meta { color: var(--text-dim); font-size: 0.85rem; margin-top: 0.2rem; }
+        .race-banner select {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-strong);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.85rem; font-weight: 700;
+            padding: 0.55rem 0.85rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .race-banner select:focus { outline: 2px solid var(--cyan); }
+
+        /* ===== 3-column grid: pool | prediction | current standings ===== */
+        .predict-grid {
+            display: grid; gap: 1.25rem;
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+        @media (max-width: 1100px) { .predict-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 750px) { .predict-grid { grid-template-columns: 1fr; } }
+
+        .panel {
+            background: var(--bg-elev);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+        .panel h3 {
+            font-size: 0.72rem; font-weight: 800;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            display: flex; justify-content: space-between; align-items: baseline;
+        }
+        .panel h3 .count {
+            font-size: 0.72rem; color: var(--cyan); font-weight: 800;
+        }
+        .panel h3 .hint {
+            font-size: 0.7rem; color: var(--text-muted); font-weight: 700;
+            letter-spacing: 0.06em;
+        }
+
+        /* ----- driver pool (left) ----- */
+        .driver-pool {
+            display: flex; flex-direction: column; gap: 0.4rem;
+            max-height: 640px; overflow-y: auto;
+        }
+        .driver-chip {
+            display: flex; align-items: center; gap: 0.6rem;
+            padding: 0.5rem 0.7rem;
+            background: var(--bg-elev-2);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--team, var(--red));
+            border-radius: 6px;
+            cursor: pointer;
+            user-select: none;
+            transition: border-color 0.15s, transform 0.1s;
+        }
+        .driver-chip:hover { border-color: var(--border-strong); }
+        .driver-chip.selected {
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 1px var(--cyan);
+        }
+        .driver-chip.used {
+            opacity: 0.35; cursor: not-allowed;
+        }
+        .driver-chip .dnum {
+            background: var(--red); color: white;
+            width: 24px; height: 24px; border-radius: 50%;
+            display: grid; place-items: center;
+            font-size: 0.7rem; font-weight: 900;
+            flex-shrink: 0;
+        }
+        .driver-chip .body { flex: 1; min-width: 0; }
+        .driver-chip .name { font-size: 0.85rem; font-weight: 800; }
+        .driver-chip .team { font-size: 0.7rem; color: var(--text-muted); }
+        .driver-chip .cur-pos {
+            font-size: 0.7rem; color: var(--text-muted);
+            font-weight: 800;
+        }
+
+        /* ----- prediction slots (middle) ----- */
+        .slots { display: flex; flex-direction: column; gap: 0.35rem; }
+        .slot {
+            display: grid;
+            grid-template-columns: 28px 32px 1fr auto;
+            gap: 0.55rem; align-items: center;
+            padding: 0.4rem 0.6rem;
+            background: var(--bg-elev-2);
+            border: 1px dashed var(--border);
+            border-radius: 6px;
+            min-height: 44px;
+            font-size: 0.82rem;
+            cursor: pointer;
+        }
+        .slot:hover { border-color: var(--cyan); }
+        .slot.filled { border-style: solid; }
+        .slot.filled { border-left: 3px solid var(--team, var(--red)); padding-left: calc(0.6rem - 2px); }
+        .slot .pos {
+            width: 24px; height: 24px; border-radius: 50%;
+            display: grid; place-items: center;
+            background: var(--bg-elev);
+            font-size: 0.7rem; font-weight: 900;
+        }
+        .slot.p1 .pos { background: var(--gold); color: #221a00; }
+        .slot.p2 .pos { background: var(--silver); color: #1a1a1a; }
+        .slot.p3 .pos { background: var(--bronze); color: #2a1600; }
+        .slot .pts-badge {
+            font-weight: 900; font-variant-numeric: tabular-nums;
+            font-size: 0.75rem;
+            color: var(--gold);
+            width: 30px; text-align: center;
+        }
+        .slot .drv { font-weight: 800; }
+        .slot .drv .team { color: var(--text-muted); font-size: 0.7rem; font-weight: 600; }
+        .slot .empty-txt {
+            color: var(--text-muted); font-style: italic; font-size: 0.78rem;
+        }
+        .slot .clear {
+            background: transparent; border: 0; color: var(--text-muted);
+            font-size: 1rem; cursor: pointer; padding: 0 0.3rem;
+        }
+        .slot .clear:hover { color: var(--red); }
+
+        .actions-row {
+            margin-top: 1rem;
+            display: flex; gap: 0.5rem;
+        }
+        .btn {
+            background: var(--cyan); color: #001624; border: 0;
+            font-family: inherit; font-weight: 900; font-size: 0.85rem;
+            letter-spacing: 0.06em; text-transform: uppercase;
+            padding: 0.75rem 1.25rem; border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px -4px rgba(71, 209, 255, 0.55); }
+        .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn.ghost { background: transparent; border: 1px solid var(--border-strong); color: var(--text); }
+        .btn.ghost:hover { border-color: var(--cyan); color: var(--cyan); box-shadow: none; }
+        .btn.next {
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: white;
+        }
+        .btn.next:hover { box-shadow: 0 6px 18px -4px rgba(168, 85, 247, 0.55); }
+
+        .sim-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: white;
+            font-size: 0.62rem; font-weight: 900;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            margin-left: 0.5rem;
+            vertical-align: 1px;
+        }
+
+        /* ----- current standings (right) ----- */
+        .mini-standings {
+            display: flex; flex-direction: column; gap: 0.25rem;
+            max-height: 640px; overflow-y: auto;
+        }
+        .standings-row {
+            display: grid;
+            grid-template-columns: 26px 1fr auto;
+            gap: 0.55rem; align-items: center;
+            padding: 0.4rem 0.6rem;
+            background: var(--bg-elev-2);
+            border-left: 3px solid var(--team, var(--red));
+            border-radius: 4px;
+            font-size: 0.82rem;
+        }
+        .standings-row .pos-num {
+            width: 24px; text-align: center;
+            font-weight: 900; font-variant-numeric: tabular-nums;
+            color: var(--text-dim);
+        }
+        .standings-row.p1 .pos-num { color: var(--gold); }
+        .standings-row.p2 .pos-num { color: var(--silver); }
+        .standings-row.p3 .pos-num { color: var(--bronze); }
+        .standings-row .who .n { font-weight: 800; }
+        .standings-row .who .t { color: var(--text-muted); font-size: 0.7rem; }
+        .standings-row .pts {
+            font-weight: 900; font-variant-numeric: tabular-nums;
+            font-size: 0.85rem;
+        }
+
+        /* ===== IMPACT VIEW ===== */
+        .impact-section {
+            margin-top: 2rem;
+            padding: 1.5rem 1.25rem;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(71, 209, 255, 0.04));
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            border-radius: 14px;
+            display: none;
+        }
+        .impact-section.visible { display: block; }
+        .impact-section h2 {
+            font-size: 1.4rem; font-weight: 900;
+            letter-spacing: -0.01em; margin-bottom: 0.35rem;
+        }
+        .impact-section h2 .accent { color: var(--purple); }
+        .impact-section p.impact-lead {
+            color: var(--text-dim); font-size: 0.9rem; margin-bottom: 1.25rem;
+        }
+        .impact-highlights {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem; margin-bottom: 1.5rem;
+        }
+        .impact-card {
+            background: var(--bg-elev-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+        }
+        .impact-card .h-label {
+            font-size: 0.68rem; color: var(--text-muted);
+            letter-spacing: 0.1em; text-transform: uppercase;
+            font-weight: 800; margin-bottom: 0.3rem;
+        }
+        .impact-card .h-value {
+            font-size: 1rem; font-weight: 900;
+        }
+        .impact-card .h-sub {
+            font-size: 0.78rem; color: var(--text-dim); margin-top: 0.15rem;
+        }
+
+        .impact-table {
+            width: 100%; border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .impact-table th {
+            text-align: left; padding: 0.5rem 0.55rem;
+            font-size: 0.68rem; font-weight: 800;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+        .impact-table th.num { text-align: right; }
+        .impact-table td {
+            padding: 0.55rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        .impact-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+        .impact-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
+        .impact-table .oldp, .impact-table .newp {
+            font-weight: 800; color: var(--text-dim);
+            font-variant-numeric: tabular-nums;
+        }
+        .impact-table .arrow {
+            display: inline-block;
+            font-weight: 900; font-size: 0.85rem;
+            width: 20px; text-align: center;
+        }
+        .impact-table .arrow.up { color: var(--up); }
+        .impact-table .arrow.down { color: var(--down); }
+        .impact-table .arrow.same { color: var(--text-muted); }
+        .impact-table .delta {
+            font-weight: 800; font-size: 0.78rem;
+            font-variant-numeric: tabular-nums;
+        }
+        .impact-table .delta.up { color: var(--up); }
+        .impact-table .delta.down { color: var(--down); }
+        .impact-table .delta.same { color: var(--text-muted); }
+        .impact-table .pts-plus {
+            color: var(--gold); font-weight: 900;
+            font-variant-numeric: tabular-nums;
+        }
+        .impact-table .team-strip {
+            display: inline-block; width: 3px; height: 14px;
+            background: var(--team, var(--red));
+            margin-right: 0.4rem; vertical-align: -2px; border-radius: 1px;
+        }
+        .highlight-row { background: rgba(168, 85, 247, 0.08); }
+
+        .disclaimer {
+            margin-top: 1rem;
+            font-size: 0.72rem; color: var(--text-muted);
+            font-style: italic; text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="brand">F1 HUB</a>
+        <h1>Standings <span class="accent">Predictor</span></h1>
+        <div class="actions">
+            <a class="action" href="/standings">Real Standings</a>
+            <a class="action" href="/">Home</a>
+        </div>
+    </nav>
+
+    <div class="container" id="app">
+        <div class="eyebrow">Playground</div>
+        <h1 class="title">Standings <span class="accent">Predictor</span></h1>
+        <p class="subtitle">Pick your top 10 for the next race. Then see how the championship standings would shift based on your prediction — pure hypothetical, nothing gets saved to the real leaderboard.</p>
+
+        <div id="raceBanner" class="race-banner">
+            <div>
+                <span class="round-tag" id="roundTag">Next Race</span>
+                <h2 id="raceName">Loading…</h2>
+                <div class="meta" id="raceMeta"></div>
+            </div>
+            <div>
+                <select id="raceSelect" title="Choose a race to simulate"></select>
+            </div>
+        </div>
+
+        <div class="predict-grid">
+            <div class="panel">
+                <h3>
+                    <span>Available Drivers</span>
+                    <span class="hint">Click to select →</span>
+                </h3>
+                <div class="driver-pool" id="driverPool"></div>
+            </div>
+
+            <div class="panel">
+                <h3>
+                    <span>Your Prediction (Top 10)</span>
+                    <span class="count"><span id="filledCount">0</span>/10</span>
+                </h3>
+                <div class="slots" id="slots"></div>
+                <div class="actions-row">
+                    <button class="btn" id="predictBtn" disabled>🔮 Show Impact</button>
+                    <button class="btn ghost" id="randomizeBtn">🎲 Randomize Rest</button>
+                    <button class="btn ghost" id="clearBtn">Clear</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>
+                    <span id="standingsTitle">Current Standings</span>
+                    <span class="hint" id="standingsHint">Real, live</span>
+                </h3>
+                <div class="mini-standings" id="miniStandings"></div>
+            </div>
+        </div>
+
+        <div class="impact-section" id="impactSection">
+            <h2>Projected <span class="accent">Championship</span></h2>
+            <p class="impact-lead" id="impactLead"></p>
+            <div class="impact-highlights" id="impactHighlights"></div>
+
+            <table class="impact-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60px">POS</th>
+                        <th>Driver</th>
+                        <th class="num">Current</th>
+                        <th class="num">+ Points</th>
+                        <th class="num">Projected</th>
+                        <th style="width: 90px" class="num">Change</th>
+                    </tr>
+                </thead>
+                <tbody id="impactBody"></tbody>
+            </table>
+
+            <p class="disclaimer">📝 This is a hypothetical projection — real championship standings are unchanged.</p>
+
+            <div class="actions-row" style="margin-top: 1rem; justify-content: center;">
+                <button class="btn next" id="nextWeekBtn">▶ Advance to Next Race Week</button>
+                <button class="btn ghost" id="resetSimBtn">🔄 Reset to Real Standings</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (async function () {
+        // POINTS system
+        const PTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
+        const TODAY = new Date().toISOString().slice(0, 10);
+
+        // ---------- Fetch data ----------
+        let drivers, teams, races;
+        try {
+            [drivers, teams, races] = await Promise.all([
+                fetch('/api/drivers').then(r => r.json()),
+                fetch('/api/teams').then(r => r.json()),
+                fetch('/api/races').then(r => r.json())
+            ]);
+        } catch (err) {
+            document.getElementById('raceName').textContent = 'Failed to load data';
+            return;
+        }
+        drivers = (drivers || []).sort((a, b) => (a.position || 999) - (b.position || 999));
+        teams = (teams || []).sort((a, b) => (a.position || 999) - (b.position || 999));
+        races = (races || []).sort((a, b) => (a.round || 999) - (b.round || 999));
+
+        // Team color map
+        const teamColorMap = {};
+        for (const t of teams) teamColorMap[t.name] = t.primaryColor || '#e10600';
+
+        // ---------- Race picker (defaults to next upcoming) ----------
+        const raceSelect = document.getElementById('raceSelect');
+        let selectedRaceIdx = 0;
+        const upcomingIdx = races.findIndex(r => r.date >= TODAY);
+        selectedRaceIdx = upcomingIdx >= 0 ? upcomingIdx : races.length - 1;
+        raceSelect.innerHTML = races.map((r, i) => {
+            const label = `R${r.round} · ${r.name.replace(' Grand Prix', ' GP')}`;
+            return `<option value="${i}" ${i === selectedRaceIdx ? 'selected' : ''}>${label}</option>`;
+        }).join('');
+        raceSelect.addEventListener('change', () => {
+            selectedRaceIdx = +raceSelect.value;
+            renderRaceBanner();
+        });
+
+        function renderRaceBanner() {
+            const race = races[selectedRaceIdx];
+            const isFuture = race.date >= TODAY;
+            document.getElementById('roundTag').textContent = isFuture ? `Round ${race.round} · Next` : `Round ${race.round}`;
+            document.getElementById('raceName').textContent = race.name;
+            const dateStr = new Date(race.date).toLocaleDateString(undefined, { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' });
+            document.getElementById('raceMeta').textContent = `${race.circuit} · ${race.country} · ${dateStr}`;
+        }
+        renderRaceBanner();
+
+        // ---------- State ----------
+        const prediction = Array(10).fill(null); // 10 slots, each: driver name or null
+        let selectedDriver = null;
+        // "workingStandings" — starts as real data, gets replaced after each simulated week.
+        // Each entry: { name, team, position, points }
+        let workingStandings = drivers.map(d => ({
+            name: d.name, team: d.team,
+            position: d.position || 999, points: d.points || 0
+        }));
+        let simulatedWeeks = 0;
+
+        // ---------- Render standings (right column) ----------
+        function renderCurrentStandings() {
+            // Sort by points desc; assign positions
+            const sorted = workingStandings.slice().sort((a, b) => b.points - a.points || a.position - b.position);
+            sorted.forEach((s, i) => { s.position = i + 1; });
+            document.getElementById('miniStandings').innerHTML = sorted.map(d => `
+                <div class="standings-row ${d.position <= 3 ? 'p' + d.position : ''}" style="--team: ${teamColorMap[d.team] || '#e10600'}">
+                    <div class="pos-num">${d.position}</div>
+                    <div class="who">
+                        <div class="n">${d.name}</div>
+                        <div class="t">${d.team}</div>
+                    </div>
+                    <div class="pts">${d.points}</div>
+                </div>
+            `).join('');
+            // Update panel title + badge
+            const title = document.getElementById('standingsTitle');
+            const hint = document.getElementById('standingsHint');
+            if (simulatedWeeks === 0) {
+                title.innerHTML = 'Current Standings';
+                hint.textContent = 'Real, live';
+            } else {
+                title.innerHTML = `Standings <span class="sim-badge">+${simulatedWeeks} simulated</span>`;
+                hint.textContent = 'Projected';
+            }
+        }
+        renderCurrentStandings();
+
+        // ---------- Render driver pool (left) ----------
+        function renderPool() {
+            const used = new Set(prediction.filter(x => x));
+            // Show drivers sorted by working standings position
+            const sortedForPool = workingStandings.slice().sort((a, b) => a.position - b.position);
+            document.getElementById('driverPool').innerHTML = sortedForPool.map(w => {
+                // Find original driver for number
+                const original = drivers.find(x => x.name === w.name);
+                const dnum = original?.driverNumber || '?';
+                const isUsed = used.has(w.name);
+                const isSelected = w.name === selectedDriver;
+                return `
+                    <div class="driver-chip ${isUsed ? 'used' : ''} ${isSelected ? 'selected' : ''}"
+                         data-name="${w.name}" style="--team: ${teamColorMap[w.team] || '#e10600'}">
+                        <div class="dnum">${dnum}</div>
+                        <div class="body">
+                            <div class="name">${w.name}</div>
+                            <div class="team">${w.team}</div>
+                        </div>
+                        <div class="cur-pos">P${w.position} · ${w.points} PTS</div>
+                    </div>
+                `;
+            }).join('');
+            document.querySelectorAll('.driver-chip').forEach(el => {
+                el.addEventListener('click', () => {
+                    if (el.classList.contains('used')) return;
+                    const name = el.dataset.name;
+                    selectedDriver = selectedDriver === name ? null : name;
+                    renderPool();
+                });
+            });
+        }
+
+        // ---------- Render prediction slots (middle) ----------
+        function renderSlots() {
+            document.getElementById('slots').innerHTML = prediction.map((name, i) => {
+                const pos = i + 1;
+                if (!name) {
+                    return `
+                        <div class="slot ${pos <= 3 ? 'p' + pos : ''}" data-slot="${i}">
+                            <div class="pos">${pos}</div>
+                            <div class="pts-badge">${PTS[i]}</div>
+                            <div class="empty-txt">Click to place selected driver</div>
+                            <div></div>
+                        </div>
+                    `;
+                }
+                const d = drivers.find(x => x.name === name);
+                const team = d ? d.team : '';
+                return `
+                    <div class="slot filled ${pos <= 3 ? 'p' + pos : ''}" data-slot="${i}"
+                         style="--team: ${teamColorMap[team] || '#e10600'}">
+                        <div class="pos">${pos}</div>
+                        <div class="pts-badge">${PTS[i]}</div>
+                        <div class="drv">${name}<div class="team">${team}</div></div>
+                        <button class="clear" data-clear="${i}">×</button>
+                    </div>
+                `;
+            }).join('');
+
+            document.querySelectorAll('.slot').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('clear')) return;
+                    if (!selectedDriver) return;
+                    const idx = +el.dataset.slot;
+                    // Replace existing slot content (either empty or filled)
+                    // If this driver is already in another slot, move them here.
+                    const existingIdx = prediction.indexOf(selectedDriver);
+                    if (existingIdx !== -1) prediction[existingIdx] = null;
+                    prediction[idx] = selectedDriver;
+                    selectedDriver = null;
+                    refresh();
+                });
+            });
+            document.querySelectorAll('.clear').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    prediction[+btn.dataset.clear] = null;
+                    refresh();
+                });
+            });
+        }
+
+        function refresh() {
+            renderPool();
+            renderSlots();
+            const filled = prediction.filter(Boolean).length;
+            document.getElementById('filledCount').textContent = filled;
+            document.getElementById('predictBtn').disabled = filled < 3;
+        }
+
+        // ---------- Impact calculation (based on workingStandings, not real drivers) ----------
+        function computeImpact() {
+            const projected = workingStandings.map(w => ({
+                name: w.name, team: w.team,
+                oldPos: w.position,
+                curPts: w.points,
+                addedPts: 0,
+                newPts: w.points
+            }));
+
+            for (let i = 0; i < prediction.length; i++) {
+                const driverName = prediction[i];
+                if (!driverName) continue;
+                const p = projected.find(x => x.name === driverName);
+                if (p) {
+                    p.addedPts = PTS[i];
+                    p.newPts = p.curPts + PTS[i];
+                }
+            }
+
+            projected.sort((a, b) => b.newPts - a.newPts || a.oldPos - b.oldPos);
+            projected.forEach((p, i) => { p.newPos = i + 1; });
+
+            return projected;
+        }
+
+        function renderImpact() {
+            const projected = computeImpact();
+            const section = document.getElementById('impactSection');
+
+            // Highlights: biggest gainer, biggest loser, new leader, closest gap
+            const gainers = projected.filter(p => p.newPos < p.oldPos).sort((a, b) => (a.oldPos - a.newPos) - (b.oldPos - b.newPos)).reverse();
+            const losers = projected.filter(p => p.newPos > p.oldPos).sort((a, b) => (a.newPos - a.oldPos) - (b.newPos - b.oldPos)).reverse();
+            const leader = projected[0];
+            const currentLeader = workingStandings.slice().sort((a, b) => a.position - b.position)[0];
+            const leaderChanged = leader && currentLeader && leader.name !== currentLeader.name;
+            const gap = projected.length >= 2 ? projected[0].newPts - projected[1].newPts : 0;
+
+            const highlights = [];
+            if (leaderChanged) {
+                highlights.push({
+                    label: 'New Leader',
+                    value: leader.name,
+                    sub: `Overtakes ${currentLeader.name}`
+                });
+            } else if (leader) {
+                highlights.push({
+                    label: 'Still Leading',
+                    value: leader.name,
+                    sub: `${leader.newPts} pts total`
+                });
+            }
+            highlights.push({
+                label: 'Championship Gap',
+                value: `${gap} pts`,
+                sub: `${projected[0].name} vs ${projected[1]?.name ?? '—'}`
+            });
+            if (gainers.length) {
+                const g = gainers[0];
+                highlights.push({
+                    label: 'Biggest Climber',
+                    value: g.name,
+                    sub: `P${g.oldPos} → P${g.newPos} (+${g.oldPos - g.newPos})`
+                });
+            }
+            if (losers.length) {
+                const l = losers[0];
+                highlights.push({
+                    label: 'Biggest Drop',
+                    value: l.name,
+                    sub: `P${l.oldPos} → P${l.newPos} (${l.newPos - l.oldPos > 0 ? '-' : ''}${l.oldPos - l.newPos})`
+                });
+            }
+            document.getElementById('impactHighlights').innerHTML = highlights.map(h => `
+                <div class="impact-card">
+                    <div class="h-label">${h.label}</div>
+                    <div class="h-value">${h.value}</div>
+                    <div class="h-sub">${h.sub}</div>
+                </div>
+            `).join('');
+
+            const race = races[selectedRaceIdx];
+            document.getElementById('impactLead').textContent =
+                `Based on your top-${prediction.filter(Boolean).length} prediction for the ${race.name}, here's how the championship would shift:`;
+
+            // Full projected table
+            document.getElementById('impactBody').innerHTML = projected.map(p => {
+                const delta = p.oldPos - p.newPos;
+                let arrow = '<span class="arrow same">–</span>';
+                let deltaCell = '<span class="delta same">±0</span>';
+                if (delta > 0) {
+                    arrow = '<span class="arrow up">▲</span>';
+                    deltaCell = `<span class="delta up">+${delta}</span>`;
+                } else if (delta < 0) {
+                    arrow = '<span class="arrow down">▼</span>';
+                    deltaCell = `<span class="delta down">${delta}</span>`;
+                }
+                const gained = p.addedPts > 0;
+                const ptsPlus = gained ? `<span class="pts-plus">+${p.addedPts}</span>` : '<span style="color:var(--text-muted)">—</span>';
+                const highlight = gained || delta !== 0 ? 'highlight-row' : '';
+                return `
+                    <tr class="${highlight}">
+                        <td><strong>P${p.newPos}</strong></td>
+                        <td>
+                            <span class="team-strip" style="--team: ${teamColorMap[p.team] || '#e10600'}"></span>
+                            <strong>${p.name}</strong>
+                            <span style="color:var(--text-muted); font-size: 0.75rem; margin-left: 0.35rem">${p.team}</span>
+                        </td>
+                        <td class="num oldp">P${p.oldPos} · ${p.curPts}</td>
+                        <td class="num">${ptsPlus}</td>
+                        <td class="num newp">${p.newPts}</td>
+                        <td class="num">${arrow} ${deltaCell}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            section.classList.add('visible');
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        document.getElementById('predictBtn').addEventListener('click', renderImpact);
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            for (let i = 0; i < prediction.length; i++) prediction[i] = null;
+            selectedDriver = null;
+            document.getElementById('impactSection').classList.remove('visible');
+            refresh();
+        });
+
+        // ---------- Randomize: fill empty slots with random unused drivers ----------
+        document.getElementById('randomizeBtn').addEventListener('click', () => {
+            const usedNames = new Set(prediction.filter(x => x));
+            const pool = workingStandings.map(w => w.name).filter(n => !usedNames.has(n));
+            // Fisher–Yates shuffle
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+            let pIdx = 0;
+            for (let i = 0; i < prediction.length; i++) {
+                if (!prediction[i] && pIdx < pool.length) {
+                    prediction[i] = pool[pIdx++];
+                }
+            }
+            selectedDriver = null;
+            refresh();
+        });
+
+        // ---------- Advance to next race week ----------
+        document.getElementById('nextWeekBtn').addEventListener('click', () => {
+            const projected = computeImpact();
+            // Bake projection into workingStandings
+            workingStandings = projected.map(p => ({
+                name: p.name, team: p.team,
+                position: p.newPos, points: p.newPts
+            }));
+            simulatedWeeks += 1;
+
+            // Advance the race dropdown (loop if we run out)
+            if (selectedRaceIdx < races.length - 1) {
+                selectedRaceIdx += 1;
+            }
+            raceSelect.value = String(selectedRaceIdx);
+            renderRaceBanner();
+
+            // Reset prediction slots + hide impact
+            for (let i = 0; i < prediction.length; i++) prediction[i] = null;
+            selectedDriver = null;
+            document.getElementById('impactSection').classList.remove('visible');
+            renderCurrentStandings();
+            refresh();
+            // Scroll back to top of predictor
+            document.querySelector('.predict-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        // ---------- Reset to real standings ----------
+        document.getElementById('resetSimBtn').addEventListener('click', () => {
+            workingStandings = drivers.map(d => ({
+                name: d.name, team: d.team,
+                position: d.position || 999, points: d.points || 0
+            }));
+            simulatedWeeks = 0;
+            for (let i = 0; i < prediction.length; i++) prediction[i] = null;
+            selectedDriver = null;
+            // Reset race picker to real next race
+            const upcomingIdx = races.findIndex(r => r.date >= TODAY);
+            selectedRaceIdx = upcomingIdx >= 0 ? upcomingIdx : races.length - 1;
+            raceSelect.value = String(selectedRaceIdx);
+            renderRaceBanner();
+            document.getElementById('impactSection').classList.remove('visible');
+            renderCurrentStandings();
+            refresh();
+        });
+
+        refresh();
+    })();
+    </script>
+</body>
+</html>

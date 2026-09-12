@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constructors - F1 Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css?v=13">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="brand">
+                <span class="logo" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 5 L10 12 L3 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 5 L17 12 L10 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+                        <path d="M17 5 L24 12 L17 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+                    </svg>
+                </span>
+                <span>F1 HUB</span>
+            </a>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/standings">Standings</a></li>
+                <li><a href="/constructors" class="active">Constructors</a></li>
+                <li><a href="/calendar">Calendar</a></li>
+                <li><a href="/news">News</a></li>
+                <li><a href="/videos">Videos</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="page-heading season-header">
+            <div>
+                <h2>Constructors</h2>
+                <p class="subtitle"><span th:text="${selectedYear}">2026</span> Formula 1 World Constructors' Championship</p>
+            </div>
+            <form class="season-picker" method="get" action="/constructors">
+                <label for="yearSelect">Season</label>
+                <select id="yearSelect" name="year" onchange="this.form.submit()">
+                    <option th:each="y : ${years}" th:value="${y}" th:text="${y}" th:selected="${y == selectedYear}">2026</option>
+                </select>
+            </form>
+        </header>
+
+        <div class="constructor-grid">
+            <a th:each="t : ${teams}"
+               class="constructor-card"
+               th:href="${t.id != null} ? @{'/team/' + ${t.id}} : (t.constructorSlug != null ? @{'/team/historic/' + ${selectedYear} + '/' + ${t.constructorSlug}} : null)"
+               th:style="'--team:' + ${t.primaryColor} + ';'">
+                <div class="constructor-card-header">
+                    <span class="constructor-pos">P<span th:text="${t.position}">1</span></span>
+                    <img th:if="${t.logoUrl != null}" class="constructor-logo" th:src="${t.logoUrl}" th:alt="${t.name}" loading="lazy">
+                </div>
+                <div class="constructor-card-body">
+                    <h3 th:text="${t.name}">Team</h3>
+                    <p class="constructor-full" th:if="${t.fullName != null and t.fullName != t.name}" th:text="${t.fullName}">Full team name</p>
+                    <div class="constructor-stats">
+                        <div>
+                            <span class="constructor-stat-label">Points</span>
+                            <span class="constructor-stat-value" th:text="${t.points}">0</span>
+                        </div>
+                        <div>
+                            <span class="constructor-stat-label">Wins</span>
+                            <span class="constructor-stat-value" th:text="${t.wins}">0</span>
+                        </div>
+                        <div>
+                            <span class="constructor-stat-label">Base</span>
+                            <span class="constructor-stat-value" th:text="${t.nationality}">—</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="constructor-car" th:if="${t.carImageUrl != null}">
+                    <img th:src="${t.carImageUrl}" th:alt="${t.name + ' car'}" loading="lazy">
+                </div>
+            </a>
+        </div>
+
+        <p class="empty-state" th:if="${#lists.isEmpty(teams)}">
+            No constructors data for <span th:text="${selectedYear}">that year</span>.
+        </p>
+    </div>
+</body>
+</html>

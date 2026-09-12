@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${team != null ? team.name + ' - F1 Hub' : 'Team not found - F1 Hub'}">Team - F1 Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css?v=13">
+    <style th:if="${team != null}" th:inline="text">
+        :root {
+            --team: [[${team.primaryColor}]];
+            --team-accent: [[${team.accentColor}]];
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="brand">
+                <span class="logo" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 5 L10 12 L3 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 5 L17 12 L10 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+                        <path d="M17 5 L24 12 L17 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+                    </svg>
+                </span>
+                <span>F1 HUB</span>
+            </a>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/standings">Standings</a></li>
+                <li><a href="/constructors" class="active">Constructors</a></li>
+                <li><a href="/calendar">Calendar</a></li>
+                <li><a href="/news">News</a></li>
+                <li><a href="/videos">Videos</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <a href="/constructors" class="back-link">← Back to constructors</a>
+
+        <section th:if="${team != null}" class="team-hero">
+            <div class="team-hero-bg"></div>
+            <div class="team-hero-content">
+                <div class="team-hero-left">
+                    <span class="team-pos-chip">P<span th:text="${team.position}">1</span></span>
+                    <img th:if="${team.logoUrl != null}" class="team-hero-logo" th:src="${team.logoUrl}" th:alt="${team.name}" loading="lazy">
+                    <h1 class="team-hero-name" th:text="${team.name}">Team</h1>
+                    <p class="team-hero-full" th:text="${team.fullName}">Full name</p>
+                </div>
+                <div class="team-hero-right">
+                    <img th:if="${team.carImageUrl != null}" class="team-hero-car" th:src="${team.carImageUrl}" th:alt="${team.name + ' 2026 car'}" loading="lazy">
+                </div>
+            </div>
+        </section>
+
+        <section th:if="${team != null}" class="team-stats">
+            <div class="team-stat">
+                <span class="team-stat-label">2026 Points</span>
+                <span class="team-stat-value" th:text="${team.points}">0</span>
+            </div>
+            <div class="team-stat">
+                <span class="team-stat-label">2026 Wins</span>
+                <span class="team-stat-value" th:text="${team.wins}">0</span>
+            </div>
+            <div class="team-stat">
+                <span class="team-stat-label">Constructor titles</span>
+                <span class="team-stat-value" th:text="${team.constructorTitles != null ? team.constructorTitles : '—'}">—</span>
+            </div>
+            <div class="team-stat">
+                <span class="team-stat-label">Driver titles</span>
+                <span class="team-stat-value" th:text="${team.driverTitles != null ? team.driverTitles : '—'}">—</span>
+            </div>
+            <div class="team-stat">
+                <span class="team-stat-label">All-time wins</span>
+                <span class="team-stat-value" th:text="${team.totalWins != null ? team.totalWins : '—'}">—</span>
+            </div>
+            <div class="team-stat">
+                <span class="team-stat-label">Founded</span>
+                <span class="team-stat-value" th:text="${team.founded != null ? team.founded : '—'}">—</span>
+            </div>
+        </section>
+
+        <section th:if="${team != null and !#lists.isEmpty(lineup)}" class="team-lineup">
+            <div class="section-header">
+                <h2>2026 Driver Lineup</h2>
+            </div>
+            <div class="team-lineup-grid">
+                <a th:each="d : ${lineup}"
+                   th:href="${d.id != null ? '/driver/' + d.id : (d.driverSlug != null ? '/driver/historic/' + selectedYear + '/' + d.driverSlug : '#')}"
+                   class="team-driver-card">
+                    <div class="team-driver-photo">
+                        <img th:if="${d.photoUrl != null}" th:src="${d.photoUrl}" th:alt="${d.name}" loading="lazy">
+                    </div>
+                    <div class="team-driver-meta">
+                        <span class="team-driver-number" th:if="${d.raceNumber != null}" th:text="${d.raceNumber}">00</span>
+                        <h3 th:text="${d.name}">Driver</h3>
+                        <p class="team-driver-pos">P<span th:text="${d.position}">0</span> · <span th:text="${d.points}">0</span> pts</p>
+                        <p class="team-driver-nat" th:text="${d.nationality}">Nationality</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <section th:if="${team != null}" class="team-grid">
+            <div class="team-card">
+                <h3>Team profile</h3>
+                <dl class="team-meta">
+                    <dt>Base</dt>
+                    <dd th:text="${team.base != null ? team.base : '—'}">—</dd>
+                    <dt>Engine</dt>
+                    <dd th:text="${team.engine != null ? team.engine : '—'}">—</dd>
+                    <dt>Team Principal</dt>
+                    <dd th:text="${team.principal != null ? team.principal : '—'}">—</dd>
+                    <dt>Nationality</dt>
+                    <dd th:text="${team.nationality != null ? team.nationality : '—'}">—</dd>
+                </dl>
+            </div>
+
+            <div class="team-card team-card-wide" th:if="${team.history != null}">
+                <h3>History</h3>
+                <p th:text="${team.history}">History</p>
+            </div>
+        </section>
+
+        <p class="empty-state" th:if="${team == null}">Team not found.</p>
+    </div>
+</body>
+</html>

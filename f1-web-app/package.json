@@ -1,0 +1,32 @@
+{
+  "name": "f1-web-app",
+  "version": "1.0.0",
+  "description": "A basic website displaying F1 standings, race schedules, and important news in the world of Formula 1.",
+  "main": "src/index.tsx",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "4.0.3",
+    "axios": "^0.21.1"
+  },
+  "devDependencies": {
+    "typescript": "^4.1.2",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0"
+  },
+  "keywords": [
+    "Formula 1",
+    "F1",
+    "racing",
+    "sports",
+    "web app"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Standings - F1 Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css?v=13">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="brand">
+                <span class="logo" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 5 L10 12 L3 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 5 L17 12 L10 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+                        <path d="M17 5 L24 12 L17 19" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+                    </svg>
+                </span>
+                <span>F1 HUB</span>
+            </a>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/standings" class="active">Standings</a></li>
+                <li><a href="/constructors">Constructors</a></li>
+                <li><a href="/calendar">Calendar</a></li>
+                <li><a href="/news">News</a></li>
+                <li><a href="/videos">Videos</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="page-heading season-header">
+            <div>
+                <h2>Driver Standings</h2>
+                <p class="subtitle"><span th:text="${selectedYear}">2026</span> Formula 1 World Championship</p>
+            </div>
+            <form class="season-picker" method="get" action="/standings">
+                <label for="yearSelect">Season</label>
+                <select id="yearSelect" name="year" onchange="this.form.submit()">
+                    <option th:each="y : ${years}" th:value="${y}" th:text="${y}" th:selected="${y == selectedYear}">2026</option>
+                </select>
+            </form>
+        </header>
+
+        <table id="standingsTable">
+            <thead>
+                <tr>
+                    <th>Pos</th>
+                    <th>Driver</th>
+                    <th>Team</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody id="driversList">
+                <tr th:each="d : ${drivers}"
+                    class="driver-row clickable"
+                    th:with="currentId=${d.driverSlug != null ? currentDriverIdBySlug.get(d.driverSlug) : null}"
+                    th:attr="data-href=${d.id != null ? '/driver/' + d.id : (currentId != null ? '/driver/' + currentId : (d.driverSlug != null ? '/driver/historic/' + selectedYear + '/' + d.driverSlug : ''))}"
+                    tabindex="0">
+                    <td th:text="${d.position}">1</td>
+                    <td class="driver-name-cell">
+                        <img th:if="${d.photoUrl != null}" class="driver-avatar" th:src="${d.photoUrl}" th:alt="${d.name}" loading="lazy">
+                        <span th:unless="${d.photoUrl != null}" class="driver-avatar-placeholder"></span>
+                        <span th:text="${d.name}">Driver</span>
+                    </td>
+                    <td th:text="${d.team}">Team</td>
+                    <td th:text="${d.points}">0</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(drivers)}">
+                    <td colspan="4" style="text-align:center;color:var(--text-muted);padding:2rem;">
+                        No standings data for <span th:text="${selectedYear}">that year</span>.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.querySelectorAll('.driver-row.clickable').forEach(row => {
+            row.addEventListener('click', () => { if (row.dataset.href) window.location.href = row.dataset.href; });
+            row.addEventListener('keydown', e => {
+                if (e.key === 'Enter' && row.dataset.href) window.location.href = row.dataset.href;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+com\example\sehja\repository\RaceRepository.class
+com\example\sehja\controller\DriverController.class
+com\example\sehja\repository\DriverRepository.class
+com\example\sehja\SehjaApplication.class
+com\example\sehja\model\Race.class
+com\example\sehja\controller\NewsController.class
+com\example\sehja\controller\PageController.class
+com\example\sehja\repository\NewsRepository.class
+com\example\sehja\model\Driver.class
+com\example\sehja\controller\RaceController.class
+com\example\sehja\model\News.class
